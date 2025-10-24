@@ -8,8 +8,8 @@ spring:
   # Database Configuration - SystemDB for users/auth
   datasource:
     url: jdbc:mysql://localhost:3306/system-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: admin123
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:admin123}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -20,7 +20,7 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: mySecretKeyForJWTTokenThatNeedsToBeAtLeast256BitsLongForHS256Algorithm
+  secret: ${JWT_SECRET:mySecretKeyForJWTTokenThatNeedsToBeAtLeast256BitsLongForHS256Algorithm}
   issuer: https://auth-api.petstore.local
   access-token:
     expiration: 900 # 15 minutes in seconds

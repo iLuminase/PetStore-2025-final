@@ -149,18 +149,101 @@ cd petstore-microservices
 
 ### 2. Setup Database
 
+The application requires **two MySQL databases**:
+
+- `system-db` - For authentication and user management
+- `store-db` - For products, cart, and orders
+
+#### Option A: Using MySQL Command Line (Recommended)
+
 ```bash
+# Navigate to project directory
+cd petstore-microservices
+
 # Login to MySQL
 mysql -u root -p
 
-# Run the database setup script
+# Run the complete setup script
 source database/setup-databases.sql
 
-# Or if you have existing database with data
-source database/alter-product-table.sql
+# Exit MySQL
+exit
 ```
 
-### 3. Start Backend Services
+#### Option B: Using MySQL Workbench
+
+1. Open MySQL Workbench
+2. Connect to your MySQL server (localhost:3306)
+3. **File** → **Open SQL Script**
+4. Select `database/setup-databases.sql`
+5. Click **Execute** (⚡ icon)
+
+#### Option C: Using PowerShell
+
+```powershell
+# Navigate to project directory
+cd d:\DoAnVNPT_LTUDJava\petStore-new
+
+# Run setup script
+Get-Content database\setup-databases.sql | mysql -u root -p
+```
+
+#### Verify Database Setup
+
+```sql
+-- Connect to MySQL
+mysql -u root -p
+
+-- Check databases
+SHOW DATABASES;
+
+-- Verify system-db (should show 2 users)
+USE `system-db`;
+SELECT username, email, role FROM users;
+
+-- Verify store-db (should show 8 products)
+USE `store-db`;
+SELECT id, name, price, stock, category FROM product;
+```
+
+**Expected Output:**
+
+- ✅ 2 users in `system-db.users` (admin, user)
+- ✅ 8 sample products in `store-db.product`
+
+#### Migration for Existing Database
+
+If you already have data and need to add image support:
+
+```bash
+# Update existing product table
+mysql -u root -p store-db < database/alter-product-table.sql
+```
+
+📖 **For detailed database documentation, see:** [database/README.md](database/README.md)
+
+### 3. Configure OAuth (Optional)
+
+If using Google OAuth login, update credentials:
+
+```bash
+# Copy example file
+cp .env.example .env
+
+# Edit .env with your Google OAuth credentials
+# Get credentials from: https://console.cloud.google.com/apis/credentials
+```
+
+Or add default values to `be/auth-api/src/main/resources/application.yml`:
+
+```yaml
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID:your-client-id}
+    client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}
+```
+
+### 4. Start Backend Services
 
 Open 4 terminals and run each service:
 
@@ -182,7 +265,14 @@ cd be/cart-api
 mvn spring-boot:run
 ```
 
-### 4. Start Frontend
+**Wait for all services to start successfully** before proceeding to frontend.
+
+Check startup logs for:
+
+- ✅ `Tomcat started on port(s): XXXX`
+- ✅ `Started [ServiceName]Application`
+
+### 5. Start Frontend
 
 ```bash
 cd fe
@@ -199,7 +289,7 @@ npm run start:products   # Port 4201
 npm run start:shared     # Port 4202
 ```
 
-### 5. Access the Application
+### 6. Access the Application
 
 - **Frontend**: http://localhost:4200
 - **Gateway API**: http://localhost:8088
@@ -207,7 +297,7 @@ npm run start:shared     # Port 4202
 - **Product API**: http://localhost:8082
 - **Cart API**: http://localhost:8083
 
-### 6. Default Credentials
+### 7. Default Credentials
 
 ```
 Username: admin
@@ -235,8 +325,9 @@ petstore-microservices/
 │   └── package.json
 │
 ├── database/                    # Database scripts
-│   ├── setup-databases.sql      # Initial setup
-│   └── alter-product-table.sql  # Migration scripts
+│   ├── setup-databases.sql      # Complete database setup
+│   ├── alter-product-table.sql  # Migration for existing DB
+│   └── README.md                # Database documentation
 │
 ├── docs/                        # Documentation
 │   ├── ARCHITECTURE.md
