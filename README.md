@@ -99,7 +99,7 @@ A modern, full-stack e-commerce application built with **microservices architect
 
 ### Backend
 
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.3.5**
 - **Spring Cloud Gateway** - API Gateway
 - **Spring Security** - Authentication & Authorization
