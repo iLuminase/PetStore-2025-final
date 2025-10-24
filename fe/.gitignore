@@ -1,0 +1,118 @@
+# ========================
+# Frontend (Angular) .gitignore
+# ========================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+out/
+.output/
+
+# Angular cache
+.angular/
+.angular/cache/
+
+# Angular build outputs
+**/dist/
+**/tmp/
+**/out-tsc/
+projects/**/dist/
+
+# Only exists if Bazel was run
+/bazel-out
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+/coverage
+*.lcov
+.nyc_output
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# System files
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Browser extension files
+Chromium/
+Chrome/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Storybook
+.storybook-static/
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Local development
+*.local
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# Module Federation cache
+.federation/
+federation-manifest.json.backup
+
+# Lock files (uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

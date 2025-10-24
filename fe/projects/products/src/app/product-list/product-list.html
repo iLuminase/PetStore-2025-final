@@ -1,0 +1,133 @@
+<div class="product-list" *ngIf="authState$ | async as authState">
+  <!-- Header -->
+  <div class="header">
+    <h1>Danh sách sản phẩm đồ ăn cho thú cưng</h1>
+
+    <!-- Search and Filter -->
+    <div class="filters">
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Tìm kiếm sản phẩm..."
+          (keyup.enter)="onSearch()"
+          class="search-input"
+        />
+        <button (click)="onSearch()" class="search-btn">Tìm kiếm</button>
+      </div>
+
+      <div class="category-filter">
+        <select
+          [(ngModel)]="selectedCategory"
+          (change)="onCategoryChange()"
+          class="category-select"
+        >
+          <option value="">Tất cả danh mục</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Đang tải sản phẩm...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadProducts()" class="retry-btn">Thử lại</button>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && !error" class="products-grid">
+    <div *ngFor="let product of products" class="product-card">
+      <div class="product-image-container">
+        <img
+          [src]="getProductImageUrl(product)"
+          [alt]="product.name"
+          class="product-image"
+          (error)="handleImageError($event)"
+        />
+        <div class="product-badge" *ngIf="product.stockQuantity < 10">
+          Sắp hết hàng
+        </div>
+      </div>
+
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+        <p class="product-category">{{ product.category }}</p>
+        <div class="product-price">
+          <span class="price"
+            >{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span
+          >
+          <span class="stock" [class.low-stock]="product.stockQuantity < 10">
+            Còn {{ product.stockQuantity }} sản phẩm
+          </span>
+        </div>
+      </div>
+
+      <div class="product-actions">
+        <button
+          (click)="addToCart(product.id)"
+          class="add-to-cart-btn"
+          [disabled]="product.stockQuantity === 0"
+        >
+          {{ product.stockQuantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ' }}
+        </button>
+        <a
+          [routerLink]="['/products/product', product.id]"
+          class="details-link"
+        >
+          Xem chi tiết
+        </a>
+        <button
+          *ngIf="userHasRole(authState, ['ADMIN', 'MANAGER'])"
+          class="btn btn-warning"
+          [routerLink]="['/products/product', product.id, 'edit']"
+        >
+          Sửa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && products.length === 0" class="empty-state">
+    <p>Không tìm thấy sản phẩm nào.</p>
+    <button (click)="loadProducts()" class="reload-btn">Tải lại</button>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && !error && totalPages > 1" class="pagination">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 0"
+      class="page-btn"
+    >
+      ‹ Trước
+    </button>
+
+    <span class="page-info">
+      Trang {{ currentPage + 1 }} / {{ totalPages }}
+    </span>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1"
+      class="page-btn"
+    >
+      Tiếp ›
+    </button>
+  </div>
+
+  <!-- Cart Link -->
+  <div class="cart-section">
+    <a routerLink="/cart" class="cart-link"> <span>🛒</span> Xem giỏ hàng </a>
+  </div>
+</div>

@@ -1,0 +1,200 @@
+<div class="product-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Đang tải chi tiết sản phẩm...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>Đã xảy ra lỗi</h2>
+    <p>{{ error }}</p>
+    <button class="btn-primary" (click)="goBack()">Quay lại danh sách</button>
+  </div>
+
+  <!-- Product Detail -->
+  <div *ngIf="product && !loading" class="product-detail">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/">Trang chủ</a>
+      <span class="separator">/</span>
+      <a routerLink="/products">Sản phẩm</a>
+      <span class="separator">/</span>
+      <span class="current">{{ product.name }}</span>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="product-content">
+      <!-- Left: Image Gallery -->
+      <div class="product-gallery">
+        <div class="main-image">
+          <img
+            [src]="getProductImageUrl()"
+            [alt]="product.name"
+            (error)="handleImageError($event)"
+          />
+          <div class="image-badge" *ngIf="product.stockQuantity < 10">
+            <span>🔥 Sắp hết hàng!</span>
+          </div>
+          <div
+            class="image-badge out-of-stock"
+            *ngIf="product.stockQuantity === 0"
+          >
+            <span>❌ Hết hàng</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Product Info -->
+      <div class="product-info">
+        <!-- Category Badge -->
+        <div class="category-badge">
+          <span>📦 {{ product.category }}</span>
+        </div>
+
+        <!-- Product Name -->
+        <h1 class="product-name">{{ product.name }}</h1>
+
+        <!-- Product Description -->
+        <p class="product-description">{{ product.description }}</p>
+
+        <!-- Price Section -->
+        <div class="price-section">
+          <div class="price-label">Giá bán:</div>
+          <div class="price-value">
+            {{ product.price | currency:'VND':'symbol':'1.0-0' }}
+          </div>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="stock-section">
+          <div class="stock-label">Tình trạng:</div>
+          <div
+            class="stock-value"
+            [class.in-stock]="product.stockQuantity > 0"
+            [class.out-of-stock]="product.stockQuantity === 0"
+          >
+            <span *ngIf="product.stockQuantity > 0">
+              ✅ Còn hàng ({{ product.stockQuantity }} sản phẩm)
+            </span>
+            <span *ngIf="product.stockQuantity === 0"> ❌ Hết hàng </span>
+          </div>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="quantity-section" *ngIf="product.stockQuantity > 0">
+          <div class="quantity-label">Số lượng:</div>
+          <div class="quantity-controls">
+            <button
+              class="qty-btn"
+              (click)="decreaseQuantity()"
+              [disabled]="quantity <= 1"
+            >
+              <span>−</span>
+            </button>
+            <input
+              type="number"
+              class="qty-input"
+              [(ngModel)]="quantity"
+              [min]="1"
+              [max]="product.stockQuantity"
+              readonly
+            />
+            <button
+              class="qty-btn"
+              (click)="increaseQuantity()"
+              [disabled]="quantity >= product.stockQuantity"
+            >
+              <span>+</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button
+            class="btn-add-to-cart"
+            (click)="addToCart()"
+            [disabled]="product.stockQuantity === 0"
+          >
+            <span class="btn-icon">🛒</span>
+            <span
+              >{{ product.stockQuantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'
+              }}</span
+            >
+          </button>
+
+          <button class="btn-secondary" (click)="goBack()">
+            <span class="btn-icon">👈</span>
+            <span>Tiếp tục mua sắm</span>
+          </button>
+
+          <button
+            *ngIf="userHasRole(['ADMIN', 'MANAGER'])"
+            class="btn-edit"
+            [routerLink]="['/products/product', product.id, 'edit']"
+          >
+            <span class="btn-icon">✏️</span>
+            <span>Chỉnh sửa</span>
+          </button>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="additional-info">
+          <div class="info-card">
+            <div class="info-icon">🚚</div>
+            <div class="info-content">
+              <h4>Giao hàng nhanh</h4>
+              <p>Giao hàng toàn quốc trong 2-3 ngày</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">🔄</div>
+            <div class="info-content">
+              <h4>Đổi trả dễ dàng</h4>
+              <p>Đổi trả miễn phí trong 7 ngày</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">✅</div>
+            <div class="info-content">
+              <h4>Chính hãng 100%</h4>
+              <p>Cam kết sản phẩm chính hãng</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details Tab -->
+    <div class="product-details-tab">
+      <h2>Thông tin chi tiết</h2>
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Mã sản phẩm:</span>
+          <span class="detail-value">#{{ product.id }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Danh mục:</span>
+          <span class="detail-value">{{ product.category }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Tình trạng:</span>
+          <span class="detail-value"
+            >{{ product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng' }}</span
+          >
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Số lượng còn lại:</span>
+          <span class="detail-value">{{ product.stockQuantity }} sản phẩm</span>
+        </div>
+      </div>
+
+      <div class="product-description-full">
+        <h3>Mô tả sản phẩm</h3>
+        <p>{{ product.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>

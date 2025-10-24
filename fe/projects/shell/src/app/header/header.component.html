@@ -1,0 +1,210 @@
+<mat-toolbar class="navbar-toolbar">
+  <div class="navbar-container">
+    <!-- Logo bên trái -->
+    <a routerLink="/" class="navbar-brand">
+      <i class="bi bi-shop"></i>
+      <span>Pet Shop</span>
+    </a>
+
+    <!-- Menu chính giữa -->
+    <nav class="navbar-menu">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        Home
+      </a>
+      <a routerLink="/about" routerLinkActive="active" class="nav-link">
+        About
+      </a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-link">
+        Products
+      </a>
+      <a routerLink="/contact" routerLinkActive="active" class="nav-link">
+        Contact
+      </a>
+    </nav>
+
+    <!-- User actions bên phải -->
+    <div class="navbar-actions">
+      <!-- Hiển thị khi chưa đăng nhập -->
+      <ng-container *ngIf="!isLoggedIn">
+        <button mat-icon-button class="user-icon-btn">
+          <mat-icon>person</mat-icon>
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          class="login-btn"
+          (click)="login()"
+        >
+          <mat-icon>login</mat-icon>
+          Login
+        </button>
+      </ng-container>
+
+      <!-- Hiển thị khi đã đăng nhập -->
+      <ng-container *ngIf="isLoggedIn">
+        <!-- Cart Icon with Badge -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="cartMenu"
+          class="cart-icon-btn"
+          [matBadge]="cartItemCount"
+          [matBadgeHidden]="cartItemCount === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+
+        <!-- User Menu -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-icon-btn logged-in"
+        >
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <span class="username-text">{{ currentUser?.email }}</span>
+        <button
+          mat-raised-button
+          color="warn"
+          class="logout-btn"
+          (click)="logout()"
+        >
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
+      </ng-container>
+
+      <!-- Cart Dropdown Menu -->
+      <mat-menu #cartMenu="matMenu" class="cart-dropdown-menu">
+        <div class="cart-menu-container" (click)="$event.stopPropagation()">
+          <div class="cart-menu-header">
+            <mat-icon>shopping_cart</mat-icon>
+            <h3>Giỏ hàng của bạn</h3>
+          </div>
+          <mat-divider></mat-divider>
+
+          <!-- Empty Cart -->
+          <div *ngIf="!cart || cart.items.length === 0" class="empty-cart">
+            <mat-icon class="empty-icon">shopping_cart</mat-icon>
+            <p>Giỏ hàng trống</p>
+            <a mat-raised-button color="primary" routerLink="/products">
+              Mua sắm ngay
+            </a>
+          </div>
+
+          <!-- Cart Items -->
+          <div *ngIf="cart && cart.items.length > 0" class="cart-items-list">
+            <div *ngFor="let item of cart.items" class="cart-item">
+              <img
+                [src]="
+                  item.productImageUrl ||
+                  '/assets/images/placeholder-product.svg'
+                "
+                [alt]="item.productName"
+                class="cart-item-image"
+                (error)="
+                  $event.target.src = '/assets/images/placeholder-product.svg'
+                "
+              />
+              <div class="cart-item-details">
+                <h4 class="cart-item-name">{{ item.productName }}</h4>
+                <p class="cart-item-price">
+                  {{
+                    item.productPrice | currency : "VND" : "symbol" : "1.0-0"
+                  }}
+                </p>
+                <div class="cart-item-quantity">
+                  <button
+                    mat-icon-button
+                    (click)="
+                      updateQuantity(
+                        item.productId.toString(),
+                        item.quantity - 1
+                      )
+                    "
+                    class="quantity-btn"
+                  >
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button
+                    mat-icon-button
+                    (click)="
+                      updateQuantity(
+                        item.productId.toString(),
+                        item.quantity + 1
+                      )
+                    "
+                    class="quantity-btn"
+                  >
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <button
+                mat-icon-button
+                (click)="removeFromCart(item.productId.toString())"
+                class="remove-btn"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cart Footer -->
+          <div *ngIf="cart && cart.items.length > 0" class="cart-menu-footer">
+            <mat-divider></mat-divider>
+            <div class="cart-total">
+              <span class="total-label">Tổng cộng:</span>
+              <span class="total-amount">
+                {{ cartTotal | currency : "VND" : "symbol" : "1.0-0" }}
+              </span>
+            </div>
+            <div class="cart-actions">
+              <button mat-stroked-button (click)="viewCart()">
+                Xem giỏ hàng
+              </button>
+              <button mat-raised-button color="primary" routerLink="/checkout">
+                Thanh toán
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-menu>
+
+      <!-- User Menu Dropdown -->
+      <mat-menu #userMenu="matMenu">
+        <div class="user-menu-header">
+          <mat-icon>account_circle</mat-icon>
+          <div class="user-info">
+            <strong>{{ currentUser?.email }}</strong>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/profile">
+          <mat-icon>person</mat-icon>
+          <span>My Profile</span>
+        </button>
+        <button mat-menu-item routerLink="/orders">
+          <mat-icon>shopping_bag</mat-icon>
+          <span>My Orders</span>
+        </button>
+        <button mat-menu-item routerLink="/settings">
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</mat-toolbar>

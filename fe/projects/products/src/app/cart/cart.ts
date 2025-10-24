@@ -1,0 +1,184 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { Subject, distinctUntilChanged, takeUntil } from 'rxjs';
+
+import { AuthService } from '../../../../shared/src/app/auth';
+import { Cart, CartItem, CartService } from '../../../../shared/src/app/cart';
+
+@Component({
+  selector: 'app-products-cart',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './cart.html',
+  styleUrl: './cart.scss'
+})
+export class CartComponent implements OnInit, OnDestroy {
+  cart: Cart | null = null;
+  cartItems: CartItem[] = [];
+  loading = false;
+  error: string | null = null;
+  isAuthenticated = false;
+
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private cartService: CartService,
+    private authService: AuthService,
+    private router: Router
+  ) { }
+
+  ngOnInit(): void {
+    // Subscribe to cart changes first
+    this.cartService.cart$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(cart => {
+        if (cart) {
+          this.cart = cart;
+          this.cartItems = cart.items;
+        }
+      });
+
+    // Check authentication - only react to isAuthenticated changes
+    this.authService.authState$
+      .pipe(
+        takeUntil(this.destroy$),
+        distinctUntilChanged((prev, curr) =>
+          prev.isAuthenticated === curr.isAuthenticated
+        )
+      )
+      .subscribe(state => {
+        const wasAuthenticated = this.isAuthenticated;
+        this.isAuthenticated = state.isAuthenticated;
+
+        if (!state.isAuthenticated) {
+          this.router.navigate(['/login']);
+        } else if (state.isAuthenticated && !wasAuthenticated) {
+          // Only load cart once when just authenticated (state changed from false to true)
+          this.loadCart();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadCart(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.cartService.getCart().subscribe({
+      next: (cart: Cart) => {
+        this.cart = cart;
+        this.cartItems = cart.items;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error('Error loading cart', err);
+        this.error = 'Không thể tải giỏ hàng. Vui lòng thử lại.';
+        this.loading = false;
+      }
+    });
+  }
+
+  increaseQuantity(item: CartItem): void {
+    this.updateQuantity(item, item.quantity + 1);
+  }
+
+  decreaseQuantity(item: CartItem): void {
+    if (item.quantity > 1) {
+      this.updateQuantity(item, item.quantity - 1);
+    }
+  }
+
+  updateQuantity(item: CartItem, quantity: number): void {
+    if (quantity < 1) {
+      this.removeItem(item.productId.toString());
+      return;
+    }
+
+    this.cartService.updateCartItem(item.productId.toString(), { quantity }).subscribe({
+      next: (response) => {
+        console.log('Cart updated successfully');
+      },
+      error: (err: any) => {
+        console.error('Error updating cart', err);
+        alert('Không thể cập nhật giỏ hàng. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  removeItem(productId: string): void {
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+      this.cartService.removeFromCart(productId).subscribe({
+        next: (response) => {
+          console.log('Item removed from cart');
+        },
+        error: (err: any) => {
+          console.error('Error removing item', err);
+          alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
+        }
+      });
+    }
+  }
+
+  clearCart(): void {
+    if (confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')) {
+      this.cartService.clearCart().subscribe({
+        next: () => {
+          console.log('Cart cleared');
+          this.cart = null;
+          this.cartItems = [];
+        },
+        error: (err: any) => {
+          console.error('Error clearing cart', err);
+          alert('Không thể xóa giỏ hàng. Vui lòng thử lại.');
+        }
+      });
+    }
+  }
+
+  checkout(): void {
+    // Navigate to checkout page (to be implemented)
+    this.router.navigate(['/checkout']);
+  }
+
+  continueShopping(): void {
+    this.router.navigate(['/products']);
+  }
+
+  getTotal(): number {
+    return this.cart ? this.cart.totalPrice : 0;
+  }
+
+  getTotalItems(): number {
+    return this.cart ? this.cart.totalItems : 0;
+  }
+
+  getItemCount(): number {
+    return this.cartItems.length;
+  }
+
+  getCartItemImageUrl(item: CartItem): string {
+    // Priority: productImageUrl, productImage, then placeholder
+    if (item.productImageUrl) {
+      if (item.productImageUrl.startsWith('http') || item.productImageUrl.startsWith('/api/products/')) {
+        return 'http://localhost:8088' + item.productImageUrl;
+      }
+      return item.productImageUrl;
+    }
+    if (item.productImage) {
+      if (item.productImage.startsWith('http') || item.productImage.startsWith('/api/products/')) {
+        return 'http://localhost:8088' + item.productImage;
+      }
+      return item.productImage;
+    }
+    return '/assets/images/placeholder-product.svg';
+  }
+
+  handleImageError(event: any): void {
+    event.target.src = '/assets/images/placeholder-product.svg';
+  }
+}

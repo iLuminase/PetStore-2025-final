@@ -1,0 +1,148 @@
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding-top: 70px; // Thêm padding để content không bị che bởi fixed navbar
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden; // Ngăn scroll ngang
+  background: #f8f9fa;
+}
+
+// Đảm bảo app root không có overflow hidden và chiếm full height
+app-shell-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+// Smooth scrolling cho toàn bộ page
+html {
+  scroll-behavior: smooth;
+}
+
+// Custom scrollbar cho toàn trang
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 5px;
+
+  &:hover {
+    background: #a0aec0;
+  }
+}
+
+// Global animation keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+// Utility classes
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+// Responsive padding
+@media (max-width: 768px) {
+  body {
+    padding-top: 60px; // Navbar nhỏ hơn trên mobile
+  }
+}
+
+// Material Design ripple effect override
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-icon-button {
+  transition: all 0.3s ease !important;
+}
+
+// Custom focus styles
+*:focus-visible {
+  outline: 2px solid #ff6b6b !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+// Loading placeholder shimmer effect
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-loader {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
