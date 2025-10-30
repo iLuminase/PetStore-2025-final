@@ -18,10 +18,10 @@ spring:
   application:
     name: api-gateway
   datasource:
-    url: jdbc:mysql://localhost:3306/system-db
-    username: root
-    password: admin123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MSSQL_STORE_JDBC:jdbc:sqlserver://phatdevio-dbserver.database.windows.net:1433;database=phatdevio-db;user=admindb@phatdevio-dbserver;password=password123!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30}
+    username: ${MSSQL_STORE_USER:admindb@phatdevio-dbserver}
+    password: ${MSSQL_STORE_PASSWORD:password123!}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
       ddl-auto: update

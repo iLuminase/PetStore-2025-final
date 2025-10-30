@@ -5,12 +5,12 @@ spring:
   application:
     name: auth-api
 
-  # Database Configuration - SystemDB for users/auth
-  datasource:
-    url: jdbc:mysql://localhost:3306/system-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:admin123}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Database Configuration - SystemDB for users/auth
+    datasource:
+      url: ${MSSQL_KEYCLOAK_JDBC:jdbc:sqlserver://keycloak-sqlserver.database.windows.net:1433;database=keycloakdb;user=keycloakadmin@keycloak-sqlserver;password=123qwe!@#;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30}
+      username: ${MSSQL_KEYCLOAK_USER:keycloakadmin@keycloak-sqlserver}
+      password: ${MSSQL_KEYCLOAK_PASSWORD:123qwe!@#}
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
   jpa:
     hibernate:
@@ -26,6 +26,10 @@ jwt:
     expiration: 900 # 15 minutes in seconds
   refresh-token:
     expiration: 2592000 # 30 days in seconds
+
+# Keycloak Realm
+keycloak:
+  realm: ${KEYCLOAK_REALM:pet-angular-realm}
 
 # Google OAuth Configuration
 google:
