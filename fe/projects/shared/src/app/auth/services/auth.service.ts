@@ -146,6 +146,12 @@ export class AuthService {
     private handleAuthError(error: any): Observable<never> {
         const errorMessage = error.error?.message || 'Authentication failed';
 
+        // If 401 Unauthorized, logout immediately
+        if (error.status === 401) {
+            console.log('Authentication failed - logging out');
+            this.logout();
+        }
+
         this.updateAuthState({
             loading: false,
             error: errorMessage
@@ -173,16 +179,18 @@ export class AuthService {
                     this.updateAuthState({ user });
                 },
                 error: (error) => {
-                    // Don't logout on decode-token error to avoid infinite loop
-                    // The AuthInterceptor will handle 401 errors and try to refresh
-                    console.error('Failed to load user profile:', error);
-
-                    // Just clear the user but keep authenticated state
-                    // If token is truly invalid, other API calls will trigger proper logout
-                    this.updateAuthState({
-                        user: null,
-                        error: 'Failed to load user profile'
-                    });
+                    if (error.status === 401) {
+                        // Token is invalid - logout
+                        console.log('Invalid token - logging out');
+                        this.logout();
+                    } else {
+                        // Other errors - just clear user but keep authenticated state
+                        console.error('Failed to load user profile:', error);
+                        this.updateAuthState({
+                            user: null,
+                            error: 'Failed to load user profile'
+                        });
+                    }
                 }
             });
     }
