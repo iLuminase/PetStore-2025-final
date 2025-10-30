@@ -12,7 +12,7 @@ import {
     providedIn: 'root'
 })
 export class CartService {
-    private apiUrl = 'http://localhost:8088/api/carts'; // Via gateway
+    private apiUrl = 'http://localhost:8080/api/carts'; // Via gateway
 
     private cartSubject = new BehaviorSubject<Cart | null>(null);
     public cart$ = this.cartSubject.asObservable();

@@ -56,7 +56,7 @@ A modern, full-stack e-commerce application built with **microservices architect
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Angular   │────▶│   Gateway   │────▶│   Auth API  │
-│   (Shell)   │     │   API:8088  │     │   :8081     │
+│   (Shell)   │     │   API:8080  │     │   :8081     │
 └─────────────┘     └─────────────┘     └─────────────┘
                            │                     │
                            ├────────────────────┤
@@ -248,7 +248,7 @@ google:
 Open 4 terminals and run each service:
 
 ```bash
-# Terminal 1 - Gateway API (Port 8088)
+# Terminal 1 - Gateway API (Port 8080)
 cd be/gateway-api
 mvn spring-boot:run
 
@@ -292,7 +292,7 @@ npm run start:shared     # Port 4202
 ### 6. Access the Application
 
 - **Frontend**: http://localhost:4200
-- **Gateway API**: http://localhost:8088
+- **Gateway API**: http://localhost:8080
 - **Auth API**: http://localhost:8081
 - **Product API**: http://localhost:8082
 - **Cart API**: http://localhost:8083
@@ -312,7 +312,7 @@ Role: ADMIN
 ```
 petstore-microservices/
 ├── be/                          # Backend services
-│   ├── gateway-api/             # API Gateway (Port 8088)
+│   ├── gateway-api/             # API Gateway (Port 8080)
 │   ├── auth-api/                # Authentication service (Port 8081)
 │   ├── product-api/             # Product management (Port 8082)
 │   └── cart-api/                # Shopping cart (Port 8083)
@@ -348,7 +348,7 @@ petstore-microservices/
 #### Register
 
 ```http
-POST http://localhost:8088/api/auth/register
+POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
@@ -361,7 +361,7 @@ Content-Type: application/json
 #### Login
 
 ```http
-POST http://localhost:8088/api/auth/login
+POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
@@ -375,19 +375,19 @@ Content-Type: application/json
 #### Get All Products (with pagination)
 
 ```http
-GET http://localhost:8088/api/products?page=0&size=10
+GET http://localhost:8080/api/products?page=0&size=10
 ```
 
 #### Get Product by ID
 
 ```http
-GET http://localhost:8088/api/products/1
+GET http://localhost:8080/api/products/1
 ```
 
 #### Create Product (Admin only)
 
 ```http
-POST http://localhost:8088/api/products
+POST http://localhost:8080/api/products
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -404,7 +404,7 @@ Content-Type: application/json
 #### Upload Product Image
 
 ```http
-POST http://localhost:8088/api/products/1/image
+POST http://localhost:8080/api/products/1/image
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: multipart/form-data
 
@@ -414,7 +414,7 @@ file: [binary image data]
 #### Get Product Image
 
 ```http
-GET http://localhost:8088/api/products/1/image
+GET http://localhost:8080/api/products/1/image
 ```
 
 ### Cart API
@@ -422,14 +422,14 @@ GET http://localhost:8088/api/products/1/image
 #### Get Cart
 
 ```http
-GET http://localhost:8088/api/cart
+GET http://localhost:8080/api/cart
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
 
 #### Add to Cart
 
 ```http
-POST http://localhost:8088/api/cart/add
+POST http://localhost:8080/api/cart/add
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -445,7 +445,7 @@ Content-Type: application/json
 #### Update Cart Item
 
 ```http
-PUT http://localhost:8088/api/cart/product/1
+PUT http://localhost:8080/api/cart/product/1
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -457,7 +457,7 @@ Content-Type: application/json
 #### Remove from Cart
 
 ```http
-DELETE http://localhost:8088/api/cart/product/1
+DELETE http://localhost:8080/api/cart/product/1
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
 

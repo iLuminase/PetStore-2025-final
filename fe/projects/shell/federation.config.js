@@ -5,7 +5,7 @@ const {
 
 module.exports = withNativeFederation({
   remotes: {
-    products: "products@http://localhost:4201/remoteEntry.json",
+    products: "products@http://localhost:4202/remoteEntry.json",
   },
 
   shared: {

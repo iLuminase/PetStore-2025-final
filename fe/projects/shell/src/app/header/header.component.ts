@@ -1,30 +1,29 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatDivider } from '@angular/material/divider';
-import { MatIcon } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatToolbar } from '@angular/material/toolbar';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { Subject, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
-import { AuthService, User } from '../../../../shared/src/app/auth';
 import { Cart, CartService } from '../../../../shared/src/app/cart';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-shell-header',
   standalone: true,
   imports: [
-    MatToolbar,
-    MatIconButton,
+    MatToolbarModule,
+    MatButtonModule,
     RouterLink,
-    MatIcon,
-    MatButton,
+    MatIconModule,
     RouterLinkActive,
     MatMenuModule,
     CommonModule,
-    MatDivider,
+    MatDividerModule,
     MatBadgeModule
   ],
   templateUrl: './header.component.html',
@@ -32,7 +31,7 @@ import { Cart, CartService } from '../../../../shared/src/app/cart';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
-  currentUser: User | null = null;
+  currentUser: any = null;
   cart: Cart | null = null;
   cartItemCount = 0;
   private destroy$ = new Subject<void>();
@@ -52,34 +51,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.cartItemCount = cart ? cart.totalItems : 0;
       });
 
-    // Subscribe to auth state changes
-    // Use distinctUntilChanged to avoid loading cart multiple times
-    this.authService.authState$
-      .pipe(
-        takeUntil(this.destroy$),
-        distinctUntilChanged((prev, curr) =>
-          prev.isAuthenticated === curr.isAuthenticated
-        )
-      )
-      .subscribe(state => {
-        const wasLoggedIn = this.isLoggedIn;
-        this.isLoggedIn = state.isAuthenticated;
-        this.currentUser = state.user;
-
-        // Only load cart once when user just logged in (state changed from false to true)
-        if (this.isLoggedIn && !wasLoggedIn) {
-          this.loadCart();
-        } else if (!this.isLoggedIn) {
-          // Clear cart when logged out
-          this.cart = null;
-          this.cartItemCount = 0;
-        }
-      });
+    // Check login status
+    this.checkLoginStatus();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private async checkLoginStatus(): Promise<void> {
+    this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.currentUser = await this.authService.getUserProfile();
+      this.loadCart();
+    }
   }
 
   loadCart(): void {
@@ -95,7 +81,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   login(): void {
-    this.router.navigate(['/login']);
+    this.authService.login();
   }
 
   logout(): void {
@@ -134,7 +120,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   get username(): string {
-    return this.currentUser?.email || '';
+    return this.currentUser?.username || this.currentUser?.email || '';
   }
 
   get cartTotal(): number {

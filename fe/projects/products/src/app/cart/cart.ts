@@ -165,13 +165,13 @@ export class CartComponent implements OnInit, OnDestroy {
     // Priority: productImageUrl, productImage, then placeholder
     if (item.productImageUrl) {
       if (item.productImageUrl.startsWith('http') || item.productImageUrl.startsWith('/api/products/')) {
-        return 'http://localhost:8088' + item.productImageUrl;
+        return 'http://localhost:8080' + item.productImageUrl;
       }
       return item.productImageUrl;
     }
     if (item.productImage) {
       if (item.productImage.startsWith('http') || item.productImage.startsWith('/api/products/')) {
-        return 'http://localhost:8088' + item.productImage;
+        return 'http://localhost:8080' + item.productImage;
       }
       return item.productImage;
     }

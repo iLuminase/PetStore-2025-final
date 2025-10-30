@@ -14,7 +14,7 @@ import {
     providedIn: 'root'
 })
 export class ProductService {
-    private apiUrl = 'http://localhost:8088/api/products'; // Via gateway
+    private apiUrl = 'http://localhost:8080/api/products'; // Via gateway
 
     private productsSubject = new BehaviorSubject<Product[]>([]);
     public products$ = this.productsSubject.asObservable();

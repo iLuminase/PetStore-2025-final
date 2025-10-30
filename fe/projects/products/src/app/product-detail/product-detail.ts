@@ -80,7 +80,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     if (this.product.imageUrl) {
       // If it's already a full URL or starts with /, use it directly
       if (this.product.imageUrl.startsWith('http') || this.product.imageUrl.startsWith('/api/products/')) {
-        return 'http://localhost:8088' + this.product.imageUrl;
+        return 'http://localhost:8080' + this.product.imageUrl;
       }
       return this.product.imageUrl;
     }

@@ -101,7 +101,7 @@ Frontend đã được cập nhật tự động để:
 **Curl example:**
 
 ```bash
-curl -X POST http://localhost:8088/api/products/1/image \
+curl -X POST http://localhost:8080/api/products/1/image \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -F "file=@/path/to/image.jpg"
 ```
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8088/api/products/1/image \
 const formData = new FormData();
 formData.append("file", imageFile);
 
-fetch("http://localhost:8088/api/products/1/image", {
+fetch("http://localhost:8080/api/products/1/image", {
   method: "POST",
   headers: {
     Authorization: "Bearer " + token,
@@ -175,7 +175,7 @@ WHERE image_data IS NOT NULL;
 ```
 
 3. Check console log cho errors
-4. Thử access trực tiếp: `http://localhost:8088/api/products/1/image`
+4. Thử access trực tiếp: `http://localhost:8080/api/products/1/image`
 
 ### 3. Upload ảnh bị lỗi
 
@@ -225,14 +225,14 @@ CREATE TABLE `product` (
 
 ```bash
 # Upload test image
-curl -X POST http://localhost:8088/api/products/1/image \
+curl -X POST http://localhost:8080/api/products/1/image \
   -F "file=@test-image.jpg"
 
 # Get image
-curl http://localhost:8088/api/products/1/image --output test-download.jpg
+curl http://localhost:8080/api/products/1/image --output test-download.jpg
 
 # Delete image
-curl -X DELETE http://localhost:8088/api/products/1/image
+curl -X DELETE http://localhost:8080/api/products/1/image
 ```
 
 ## Troubleshooting Commands

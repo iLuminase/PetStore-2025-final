@@ -174,7 +174,7 @@ export class ProductList implements OnInit, OnDestroy {
     if (product.imageUrl) {
       // If it's already a full URL or starts with /, use it directly
       if (product.imageUrl.startsWith('http') || product.imageUrl.startsWith('/api/products/')) {
-        return 'http://localhost:8088' + product.imageUrl;
+        return 'http://localhost:8080' + product.imageUrl;
       }
       return product.imageUrl;
     }
