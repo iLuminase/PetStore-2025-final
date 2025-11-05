@@ -1,6 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-unauthorized',
@@ -14,12 +14,12 @@ import { CommonModule } from '@angular/common';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h1>Access Denied</h1>
-        <p class="message">You don't have permission to access this page.</p>
-        <p class="sub-message">Please contact your administrator if you believe this is an error.</p>
+        <h1>Truy cập bị từ chối</h1>
+        <p class="message">Bạn không có quyền truy cập trang này.</p>
+        <p class="sub-message">Vui lòng liên hệ quản trị viên nếu bạn nghĩ rằng đây là một lỗi.</p>
         <div class="actions">
-          <button class="btn-primary" (click)="goHome()">Go to Home</button>
-          <button class="btn-secondary" (click)="goBack()">Go Back</button>
+          <button class="btn-primary" (click)="goHome()">Về trang chủ</button>
+          <button class="btn-secondary" (click)="goBack()">Quay lại</button>
         </div>
       </div>
     </div>
@@ -113,7 +113,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class UnauthorizedComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   goHome(): void {
     this.router.navigate(['/']);

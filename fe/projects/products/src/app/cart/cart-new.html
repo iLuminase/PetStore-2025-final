@@ -104,12 +104,12 @@
             <!-- Item Actions -->
             <div class="item-actions">
               <div class="item-total">
-                {{ ((item.productPrice || 0) * item.quantity) |
+                {{ (item.productPrice * item.quantity) |
                 currency:'VND':'symbol':'1.0-0' }}
               </div>
               <button
                 class="remove-btn"
-                (click)="removeItem(item.productId.toString())"
+                (click)="removeItem(item)"
                 title="Xóa sản phẩm"
               >
                 <i>🗑️</i>
@@ -186,10 +186,27 @@
             Lưu để mua sau
           </button>
           <button class="share-cart-btn" (click)="shareCart()">
-            <i>�</i>
+            <i>📤</i>
             Chia sẻ giỏ hàng
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations Section -->
+  <div *ngIf="!loading && cartItems.length > 0" class="recommendations">
+    <h3>Bạn có thể thích</h3>
+    <div class="recommended-products">
+      <div *ngFor="let product of recommendedProducts" class="recommended-item">
+        <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+        <h4>{{ product.name }}</h4>
+        <p class="price">
+          {{ product.price | currency:'VND':'symbol':'1.0-0' }}
+        </p>
+        <button class="add-to-cart-btn" (click)="addRecommendedToCart(product)">
+          Thêm vào giỏ
+        </button>
       </div>
     </div>
   </div>

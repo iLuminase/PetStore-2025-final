@@ -47,18 +47,41 @@
 
       <!-- Hiển thị khi đã đăng nhập -->
       <ng-container *ngIf="isLoggedIn">
-        <!-- Cart Icon with Badge -->
+        <!-- Modern Cart Button -->
         <button
-          mat-icon-button
           [matMenuTriggerFor]="cartMenu"
-          class="cart-icon-btn"
-          [matBadge]="cartItemCount"
-          [matBadgeHidden]="cartItemCount === 0"
-          matBadgeColor="warn"
-          matBadgeSize="small"
-          matTooltip="Giỏ hàng"
+          class="modern-cart-btn"
+          [class.has-items]="cartItemCount > 0"
+          matTooltip="Giỏ hàng của bạn"
         >
-          <mat-icon>shopping_cart</mat-icon>
+          <div class="cart-icon-wrapper">
+            <svg
+              class="cart-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16 5 16H17M17 13V17C17 18.1 16.1 19 15 19H9C7.9 19 7 18.1 7 17V13M17 13H7"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="9" cy="21" r="1" fill="currentColor" />
+              <circle cx="20" cy="21" r="1" fill="currentColor" />
+            </svg>
+            <span class="cart-badge" *ngIf="cartItemCount > 0">{{
+              cartItemCount
+            }}</span>
+          </div>
+          <div class="cart-info">
+            <span class="cart-label">Giỏ hàng</span>
+            <span class="cart-count" *ngIf="cartItemCount > 0"
+              >({{ cartItemCount }})</span
+            >
+            <span class="cart-empty" *ngIf="cartItemCount === 0">Trống</span>
+          </div>
         </button>
 
         <!-- User Menu -->
@@ -95,97 +118,159 @@
         </mat-menu>
       </ng-container>
 
-      <!-- Cart Dropdown Menu -->
-      <mat-menu #cartMenu="matMenu" class="cart-dropdown-menu">
+      <!-- Modern Cart Dropdown Menu -->
+      <mat-menu #cartMenu="matMenu" class="modern-cart-dropdown">
         <div class="cart-menu-container" (click)="$event.stopPropagation()">
+          <!-- Header -->
           <div class="cart-menu-header">
-            <mat-icon>shopping_cart</mat-icon>
-            <h3>Giỏ hàng của bạn</h3>
+            <div class="header-content">
+              <svg class="cart-header-icon" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16 5 16H17M17 13V17C17 18.1 16.1 19 15 19H9C7.9 19 7 18.1 7 17V13M17 13H7"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div class="header-text">
+                <h3>Giỏ hàng</h3>
+                <span *ngIf="cart && cart.items.length > 0" class="item-count"
+                  >{{ cart.items.length }} sản phẩm</span
+                >
+                <span
+                  *ngIf="!cart || cart.items.length === 0"
+                  class="item-count"
+                  >Trống</span
+                >
+              </div>
+            </div>
           </div>
-          <mat-divider></mat-divider>
 
           <!-- Empty Cart -->
-          <div *ngIf="!cart || cart.items.length === 0" class="empty-cart">
-            <mat-icon class="empty-icon">shopping_cart</mat-icon>
-            <p>Giỏ hàng trống</p>
-            <a mat-raised-button color="primary" routerLink="/products">
+          <div
+            *ngIf="!cart || cart.items.length === 0"
+            class="empty-cart-modern"
+          >
+            <div class="empty-illustration">
+              <svg class="empty-cart-icon" viewBox="0 0 100 100" fill="none">
+                <path
+                  d="M20 35H80L75 65H25L20 35Z"
+                  stroke="#e2e8f0"
+                  stroke-width="2"
+                  fill="#f8fafc"
+                />
+                <circle cx="30" cy="75" r="3" fill="#e2e8f0" />
+                <circle cx="70" cy="75" r="3" fill="#e2e8f0" />
+                <path d="M25 25L30 35" stroke="#e2e8f0" stroke-width="2" />
+              </svg>
+            </div>
+            <h4>Giỏ hàng trống</h4>
+            <p>Hãy thêm sản phẩm yêu thích vào giỏ hàng</p>
+            <button class="shop-now-btn" routerLink="/products">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                />
+              </svg>
               Mua sắm ngay
-            </a>
+            </button>
           </div>
 
           <!-- Cart Items -->
-          <div *ngIf="cart && cart.items.length > 0" class="cart-items-list">
-            <div *ngFor="let item of cart.items" class="cart-item">
-              <img
-                [src]="
-                  item.productImageUrl ||
-                  '/assets/images/placeholder-product.svg'
-                "
-                [alt]="item.productName"
-                class="cart-item-image"
-                (error)="
-                  $event.target.src = '/assets/images/placeholder-product.svg'
-                "
-              />
-              <div class="cart-item-details">
-                <h4 class="cart-item-name">{{ item.productName }}</h4>
-                <p class="cart-item-price">
-                  {{
+          <div *ngIf="cart && cart.items.length > 0" class="cart-items-modern">
+            <div
+              *ngFor="let item of cart.items; let i = index"
+              class="cart-item-modern"
+            >
+              <div class="item-image">
+                <img
+                  [src]="
+                    item.productImageUrl ||
+                    '/assets/images/placeholder-product.svg'
+                  "
+                  [alt]="item.productName"
+                  (error)="
+                    $event.target.src = '/assets/images/placeholder-product.svg'
+                  "
+                />
+              </div>
+              <div class="item-details">
+                <h4 class="item-name">{{ item.productName }}</h4>
+                <div class="item-meta">
+                  <span class="item-price">{{
                     item.productPrice | currency : "VND" : "symbol" : "1.0-0"
-                  }}
-                </p>
-                <div class="cart-item-quantity">
+                  }}</span>
+                  <span class="item-quantity">x{{ item.quantity }}</span>
+                </div>
+                <div class="quantity-controls">
                   <button
-                    mat-icon-button
+                    class="qty-btn"
                     (click)="
                       updateQuantity(
                         item.productId.toString(),
                         item.quantity - 1
                       )
                     "
-                    class="quantity-btn"
+                    [disabled]="item.quantity <= 1"
                   >
-                    <mat-icon>remove</mat-icon>
+                    −
                   </button>
-                  <span class="quantity">{{ item.quantity }}</span>
+                  <span class="qty-display">{{ item.quantity }}</span>
                   <button
-                    mat-icon-button
+                    class="qty-btn"
                     (click)="
                       updateQuantity(
                         item.productId.toString(),
                         item.quantity + 1
                       )
                     "
-                    class="quantity-btn"
                   >
-                    <mat-icon>add</mat-icon>
+                    +
                   </button>
                 </div>
               </div>
-              <button
-                mat-icon-button
-                (click)="removeFromCart(item.productId.toString())"
-                class="remove-btn"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
+              <div class="item-actions">
+                <div class="item-total">
+                  {{
+                    (item.productPrice || 0) * item.quantity
+                      | currency : "VND" : "symbol" : "1.0-0"
+                  }}
+                </div>
+                <button
+                  class="remove-btn"
+                  (click)="removeFromCart(item.productId.toString())"
+                  title="Xóa sản phẩm"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Cart Footer -->
-          <div *ngIf="cart && cart.items.length > 0" class="cart-menu-footer">
-            <mat-divider></mat-divider>
-            <div class="cart-total">
-              <span class="total-label">Tổng cộng:</span>
-              <span class="total-amount">
-                {{ cartTotal | currency : "VND" : "symbol" : "1.0-0" }}
-              </span>
+          <!-- Footer -->
+          <div
+            *ngIf="cart && cart.items.length > 0"
+            class="cart-menu-footer-modern"
+          >
+            <div class="cart-summary">
+              <div class="summary-row">
+                <span>Tổng cộng:</span>
+                <span class="total-amount">{{
+                  cartTotal | currency : "VND" : "symbol" : "1.0-0"
+                }}</span>
+              </div>
             </div>
-            <div class="cart-actions">
-              <button mat-stroked-button (click)="viewCart()">
+            <div class="cart-actions-modern">
+              <button class="view-cart-btn" (click)="viewCart()">
                 Xem giỏ hàng
               </button>
-              <button mat-raised-button color="primary" routerLink="/checkout">
+              <button class="checkout-btn" routerLink="/checkout">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor">
+                  <path
+                    d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"
+                  />
+                </svg>
                 Thanh toán
               </button>
             </div>

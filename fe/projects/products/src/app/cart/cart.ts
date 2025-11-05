@@ -1,5 +1,7 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, distinctUntilChanged, takeUntil } from 'rxjs';
 
@@ -9,9 +11,17 @@ import { Cart, CartItem, CartService } from '../../../../shared/src/app/cart';
 @Component({
   selector: 'app-products-cart',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './cart.html',
-  styleUrl: './cart.scss'
+  styleUrl: './cart.scss',
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-20px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
+      ])
+    ])
+  ]
 })
 export class CartComponent implements OnInit, OnDestroy {
   cart: Cart | null = null;
@@ -180,5 +190,52 @@ export class CartComponent implements OnInit, OnDestroy {
 
   handleImageError(event: any): void {
     event.target.src = '/assets/images/placeholder-product.svg';
+  }
+
+  // New methods for modern cart design
+  promoCode: string = '';
+  recommendedProducts: any[] = [];
+
+  trackByCartItem(index: number, item: CartItem): any {
+    return item.productId;
+  }
+
+  getSubtotal(): number {
+    return this.getTotal();
+  }
+
+  getShippingFee(): number {
+    return 0; // Free shipping
+  }
+
+  getDiscount(): number {
+    return 0; // No discount for now
+  }
+
+  applyPromoCode(): void {
+    if (this.promoCode.trim()) {
+      // TODO: Implement promo code logic
+      console.log('Applying promo code:', this.promoCode);
+    }
+  }
+
+  proceedToCheckout(): void {
+    // TODO: Navigate to checkout page
+    console.log('Proceeding to checkout...');
+  }
+
+  saveForLater(): void {
+    // TODO: Implement save for later functionality
+    console.log('Saving cart for later...');
+  }
+
+  shareCart(): void {
+    // TODO: Implement share cart functionality
+    console.log('Sharing cart...');
+  }
+
+  addRecommendedToCart(product: any): void {
+    // TODO: Add recommended product to cart
+    console.log('Adding recommended product:', product);
   }
 }

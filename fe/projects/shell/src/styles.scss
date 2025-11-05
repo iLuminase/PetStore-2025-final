@@ -11,7 +11,8 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  padding-top: 70px; // Thêm padding để content không bị che bởi fixed navbar
+  font-size: 14px; // Giảm font size từ mặc định 16px
+  padding-top: 60px; // Giảm padding top từ 70px
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -113,8 +114,69 @@ html {
 // Responsive padding
 @media (max-width: 768px) {
   body {
-    padding-top: 60px; // Navbar nhỏ hơn trên mobile
+    padding-top: 56px; // Navbar nhỏ hơn trên mobile
+    font-size: 13px; // Font nhỏ hơn trên mobile
   }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 52px;
+    font-size: 12px; // Font còn nhỏ hơn trên điện thoại
+  }
+}
+
+// Compact styles cho các component Material
+.mat-mdc-card {
+  padding: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  font-size: 13px !important;
+  padding: 8px 16px !important;
+  min-width: auto !important;
+  height: 36px !important;
+}
+
+.mat-mdc-icon-button {
+  width: 36px !important;
+  height: 36px !important;
+
+  .mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+.mat-mdc-form-field {
+  font-size: 14px !important;
+
+  .mat-mdc-form-field-wrapper {
+    padding-bottom: 12px !important;
+  }
+}
+
+h1 {
+  font-size: 1.8rem !important;
+}
+h2 {
+  font-size: 1.5rem !important;
+}
+h3 {
+  font-size: 1.3rem !important;
+}
+h4 {
+  font-size: 1.1rem !important;
+}
+h5 {
+  font-size: 1rem !important;
+}
+h6 {
+  font-size: 0.9rem !important;
 }
 
 // Material Design ripple effect override
