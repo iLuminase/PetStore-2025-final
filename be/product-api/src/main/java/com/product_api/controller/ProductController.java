@@ -94,9 +94,24 @@ public class ProductController {
             List<ProductResponseDTO> products = productService.getActiveProducts();
             return ResponseEntity.ok(products);
         } catch (Exception e) {
+            System.err.println("Error loading active products: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    // Debug endpoint
+    @GetMapping("/test")
+    public ResponseEntity<String> testConnection() {
+        try {
+            List<ProductResponseDTO> products = productService.getAllProducts();
+            return ResponseEntity.ok("Database connected! Product count: " + products.size());
+        } catch (Exception e) {
+            return ResponseEntity.ok("Database error: " + e.getMessage());
+        }
+    }
+    
+    // Test endpoint removed
     
     // Get available products (in stock)
     @GetMapping("/available")

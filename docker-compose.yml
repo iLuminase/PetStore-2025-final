@@ -1,0 +1,128 @@
+version: "3.8"
+
+services:
+  # Frontend
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway-api
+      - auth-api
+      - product-api
+      - cart-api
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Gateway API
+  gateway-api:
+    build:
+      context: ./be/gateway-api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AUTH_API_URL=http://auth-api:8081
+      - PRODUCT_API_URL=http://product-api:8082
+      - CART_API_URL=http://cart-api:8083
+    depends_on:
+      - auth-api
+      - product-api
+      - cart-api
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Auth API
+  auth-api:
+    build:
+      context: ./be/auth-api
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - KEYCLOAK_URL=http://keycloak:8080
+      - MSSQL_STORE_JDBC=jdbc:sqlserver://db:1433;database=PetStoreDb
+      - MSSQL_STORE_USER=${DB_USER:-admindb}
+      - MSSQL_STORE_PASSWORD=${DB_PASSWORD:-password123!}
+    depends_on:
+      - keycloak
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Product API
+  product-api:
+    build:
+      context: ./be/product-api
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - MSSQL_STORE_JDBC=jdbc:sqlserver://phatdevio-dbserver.database.windows.net:1433;database=PetStoreDb;user=admindb@phatdevio-dbserver;password=password123!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30
+      - MSSQL_STORE_USER=admindb@phatdevio-dbserver
+      - MSSQL_STORE_PASSWORD=password123!
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Cart API
+  cart-api:
+    build:
+      context: ./be/cart-api
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - MSSQL_STORE_JDBC=jdbc:sqlserver://phatdevio-dbserver.database.windows.net:1433;database=PetStoreDb;user=admindb@phatdevio-dbserver;password=password123!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30
+      - MSSQL_STORE_USER=admindb@phatdevio-dbserver
+      - MSSQL_STORE_PASSWORD=password123!
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    ports:
+      - "8090:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin123
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak123
+    command: ["start-dev"]
+    depends_on:
+      - keycloak-db
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+  # Keycloak Database
+  keycloak-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak123
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    networks:
+      - petstore-network
+    restart: unless-stopped
+
+networks:
+  petstore-network:
+    driver: bridge
+
+volumes:
+  keycloak_data:

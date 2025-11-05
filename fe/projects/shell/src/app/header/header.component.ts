@@ -6,11 +6,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { Cart, CartService } from '../../../../shared/src/app/cart';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-shell-header',
@@ -24,35 +25,74 @@ import { AuthService } from '../services/auth.service';
     MatMenuModule,
     CommonModule,
     MatDividerModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatTooltipModule
   ],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  isLoggedIn = false;
-  currentUser: any = null;
-  cart: Cart | null = null;
-  cartItemCount = 0;
   private destroy$ = new Subject<void>();
+  cart: Cart = {
+    items: [],
+    userId: '',
+    totalItems: 0,
+    totalQuantity: 0,
+    totalAmount: 0,
+    totalPrice: 0,
+    subtotal: 0,
+    tax: 0,
+    shipping: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    id: ''
+  } as unknown as Cart;
+  itemsQuantity = 0;
+  cartItemCount = 0;
+  isLoggedIn = false;
+  username: string = '';
 
   constructor(
-    private authService: AuthService,
     private cartService: CartService,
-    private router: Router
-  ) { }
+    public router: Router,
+    public authService: AuthService
+  ) {
+    this.authService.isLoggedIn$.subscribe((isLoggedIn: boolean) => {
+      this.isLoggedIn = isLoggedIn;
+      if (isLoggedIn) {
+        this.username = this.authService.getUsername() || '';
+      } else {
+        this.username = '';
+      }
+    });
+  }
 
   ngOnInit(): void {
-    // Subscribe to cart changes first
-    this.cartService.cart$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(cart => {
+    // @ts-ignore - cart$ is a BehaviorSubject in the service
+    this.cartService.cart$.pipe(takeUntil(this.destroy$)).subscribe((cart: Cart) => {
+      if (cart && cart.items) {
         this.cart = cart;
-        this.cartItemCount = cart ? cart.totalItems : 0;
-      });
-
-    // Check login status
-    this.checkLoginStatus();
+        this.itemsQuantity = cart.items.length || 0;
+        this.cartItemCount = cart.items.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+      } else {
+        this.cart = {
+          userId: 0,
+          items: [],
+          totalItems: 0,
+          totalQuantity: 0,
+          totalAmount: 0,
+          totalPrice: 0,
+          subtotal: 0,
+          tax: 0,
+          shipping: 0,
+          id: '',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        this.itemsQuantity = 0;
+        this.cartItemCount = 0;
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -60,32 +100,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private async checkLoginStatus(): Promise<void> {
-    this.isLoggedIn = this.authService.isLoggedIn();
-    if (this.isLoggedIn) {
-      this.currentUser = await this.authService.getUserProfile();
-      this.loadCart();
-    }
-  }
-
-  loadCart(): void {
-    this.cartService.getCart().subscribe({
-      next: (cart) => {
-        this.cart = cart;
-        this.cartItemCount = cart.totalItems;
-      },
-      error: (err) => {
-        console.error('Error loading cart:', err);
-      }
-    });
-  }
-
   login(): void {
     this.authService.login();
   }
 
-  logout(): void {
-    this.authService.logout();
+  onLogin(): void {
+    this.authService.login();
+  }
+
+  onLogout(): void {
+    this.authService.logout().then(() => {
+      this.router.navigate(['/']);
+    });
   }
 
   removeFromCart(productId: string): void {
@@ -119,11 +145,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/cart']);
   }
 
-  get username(): string {
-    return this.currentUser?.username || this.currentUser?.email || '';
-  }
-
   get cartTotal(): number {
-    return this.cart ? this.cart.totalPrice : 0;
+    return this.cart ? this.cart.totalAmount : 0;
   }
 }

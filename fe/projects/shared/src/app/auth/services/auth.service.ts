@@ -14,7 +14,7 @@ import {
     providedIn: 'root'
 })
 export class AuthService {
-    private apiUrl = 'http://localhost:8080/api/auth';
+    private apiUrl = 'http://localhost:8090/auth';
     private tokenKey = 'auth_token';
     private refreshTokenKey = 'refresh_token';
 

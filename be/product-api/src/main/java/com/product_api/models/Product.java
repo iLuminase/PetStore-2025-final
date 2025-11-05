@@ -5,64 +5,77 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "product")
+@Table(name = "Product")
 public class Product {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
     private Long id;
     
     @NotBlank(message = "Product name is required")
     @Size(max = 255, message = "Product name cannot exceed 255 characters")
+    @Column(name = "Name", nullable = false, length = 255)
     private String name;
     
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
     
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "Price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
     
-    @NotNull(message = "Stock quantity is required")
-    private Integer stockQuantity;
+    @NotNull(message = "Stock is required")
+    @PositiveOrZero(message = "Stock cannot be negative")
+    @Column(name = "Stock", nullable = false)
+    private Integer stock = 0;
     
-    @Size(max = 100, message = "Category cannot exceed 100 characters")
-    private String category;
+    @Column(name = "CategoryId")
+    private Long categoryId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CategoryId", insertable = false, updatable = false)
+    private Category category;
     
     @Size(max = 50, message = "Brand cannot exceed 50 characters")
+    @Column(name = "Brand", length = 50)
     private String brand;
     
     @Size(max = 500, message = "Image URL cannot exceed 500 characters")
+    @Column(name = "ImageUrl", length = 500)
     private String imageUrl;
     
-    @Lob
-    @Column(name = "image_data", columnDefinition = "LONGBLOB")
+    @Column(name = "ImageData", columnDefinition = "VARBINARY(MAX)")
     private byte[] imageData;
     
-    @Column(name = "image_type", length = 50)
-    private String imageType; // MIME type: image/jpeg, image/png, etc.
+    @Column(name = "ImageType", length = 50)
+    private String imageType;
     
-    @Column(nullable = false)
+    @NotNull
+    @Column(name = "Active", nullable = false)
     private Boolean active = true;
     
-    @Column(updatable = false)
+    @Column(name = "CreatedAt", nullable = false, updatable = false, columnDefinition = "DATETIME2(7)")
     private LocalDateTime createdAt;
     
+    @Column(name = "UpdatedAt", nullable = false, columnDefinition = "DATETIME2(7)")
     private LocalDateTime updatedAt;
     
     @PrePersist
@@ -79,11 +92,11 @@ public class Product {
     // Constructors
     public Product() {}
     
-    public Product(String name, String description, BigDecimal price, Integer stockQuantity) {
+    public Product(String name, String description, BigDecimal price, Integer stock) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.stockQuantity = stockQuantity;
+        this.stock = stock;
     }
     
     // Getters and Setters
@@ -119,19 +132,36 @@ public class Product {
         this.price = price;
     }
     
+    public Integer getStock() {
+        return stock;
+    }
+    
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+    
+    // For backward compatibility
     public Integer getStockQuantity() {
-        return stockQuantity;
+        return stock;
     }
     
     public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
+        this.stock = stockQuantity;
     }
     
-    public String getCategory() {
+    public Long getCategoryId() {
+        return categoryId;
+    }
+    
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+    
+    public Category getCategory() {
         return category;
     }
     
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
     

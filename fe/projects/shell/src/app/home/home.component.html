@@ -1,3 +1,36 @@
+<!-- User Info Bar -->
+<div
+  *ngIf="isAuthenticated"
+  style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  "
+>
+  <span style="font-weight: 500">Welcome, {{ username }}!</span>
+  <button
+    (click)="logout()"
+    style="
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    "
+  >
+    Logout
+  </button>
+</div>
 
 <!-- Hero Section -->
 <section class="hero-section">
@@ -8,8 +41,9 @@
         Make Your Pets Happy
       </h1>
       <p class="hero-description">
-        Premium quality pet food and accessories for your beloved companions.
-        We provide the best nutrition and care products for dogs, cats, and all pets.
+        Premium quality pet food and accessories for your beloved companions. We
+        provide the best nutrition and care products for dogs, cats, and all
+        pets.
       </p>
       <div class="hero-buttons">
         <button class="btn btn-primary" routerLink="/products">
@@ -173,7 +207,9 @@
   <div class="container">
     <div class="section-header">
       <h2 class="section-title">Why Choose Pet Shop</h2>
-      <p class="section-description">We care about your pets as much as you do</p>
+      <p class="section-description">
+        We care about your pets as much as you do
+      </p>
     </div>
     <div class="features-grid">
       <div class="feature-card">
@@ -217,7 +253,11 @@
         <p>Get special offers and updates about new products</p>
       </div>
       <div class="newsletter-form">
-        <input type="email" placeholder="Enter your email address" class="newsletter-input">
+        <input
+          type="email"
+          placeholder="Enter your email address"
+          class="newsletter-input"
+        />
         <button class="btn btn-primary">Subscribe</button>
       </div>
     </div>

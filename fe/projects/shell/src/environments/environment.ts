@@ -1,5 +1,10 @@
 export const environment = {
     production: false,
+    keycloak: {
+        url: 'http://localhost:9090',
+        realm: 'pet-realm',
+        clientId: 'pet-client'
+    },
     api: {
         auth: 'http://localhost:8090',
         product: 'http://localhost:8082',

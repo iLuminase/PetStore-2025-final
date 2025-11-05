@@ -22,8 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Find by name containing (case insensitive)
     List<Product> findByNameContainingIgnoreCase(String name);
     
-    // Find by category
-    List<Product> findByCategoryAndActiveTrue(String category);
+    // Find by categoryId
+    List<Product> findByCategoryIdAndActiveTrue(Long categoryId);
     
     // Find by brand
     List<Product> findByBrandAndActiveTrue(String brand);
@@ -32,11 +32,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByPriceBetweenAndActiveTrue(BigDecimal minPrice, BigDecimal maxPrice);
     
     // Find products with stock available
-    @Query("SELECT p FROM Product p WHERE p.stockQuantity > 0 AND p.active = true")
+    @Query("SELECT p FROM Product p WHERE p.stock > 0 AND p.active = true")
     List<Product> findAvailableProducts();
     
     // Find products by category with pagination
-    Page<Product> findByCategoryAndActiveTrue(String category, Pageable pageable);
+    Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);
     
     // Search products by name or description
     @Query("SELECT p FROM Product p WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
@@ -44,16 +44,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> searchProducts(@Param("searchTerm") String searchTerm, Pageable pageable);
     
     // Find products with low stock
-    @Query("SELECT p FROM Product p WHERE p.stockQuantity <= :threshold AND p.active = true")
+    @Query("SELECT p FROM Product p WHERE p.stock <= :threshold AND p.active = true")
     List<Product> findLowStockProducts(@Param("threshold") Integer threshold);
     
-    // Get all distinct categories
-    @Query("SELECT DISTINCT p.category FROM Product p WHERE p.active = true AND p.category IS NOT NULL")
-    List<String> findDistinctCategories();
+    // Get all distinct categoryIds
+    @Query("SELECT DISTINCT p.categoryId FROM Product p WHERE p.active = true AND p.categoryId IS NOT NULL")
+    List<Long> findDistinctCategoryIds();
     
     // Get all distinct brands
     @Query("SELECT DISTINCT p.brand FROM Product p WHERE p.active = true AND p.brand IS NOT NULL")
     List<String> findDistinctBrands();
+    
+    // Get all categories with their names (using join)
+    @Query("SELECT c.name FROM Product p JOIN p.category c WHERE p.active = true AND c.active = true GROUP BY c.name")
+    List<String> findDistinctCategoryNames();
     
     // Find by ID and active
     Optional<Product> findByIdAndActiveTrue(Long id);
