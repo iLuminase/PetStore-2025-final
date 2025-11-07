@@ -40,6 +40,19 @@
           </option>
         </select>
       </div>
+
+      <div class="brand-filter">
+        <select
+          [(ngModel)]="selectedBrand"
+          (change)="onBrandChange()"
+          class="brand-select"
+        >
+          <option value="">Tất cả thương hiệu</option>
+          <option *ngFor="let brand of brands" [value]="brand">
+            {{ brand }}
+          </option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -105,6 +118,13 @@
         >
           Sửa
         </button>
+        <button
+          *ngIf="userHasRole(authState, ['ADMIN', 'MANAGER'])"
+          class="btn btn-danger"
+          (click)="openDeleteModal(product)"
+        >
+          Xóa
+        </button>
       </div>
     </div>
   </div>
@@ -143,3 +163,30 @@
     <a routerLink="/cart" class="cart-link"> <span>🛒</span> Xem giỏ hàng </a>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<app-modal
+  [isOpen]="showDeleteModal"
+  title="Xác nhận xóa sản phẩm"
+  [message]="getDeleteMessage()"
+  confirmText="Xóa"
+  cancelText="Hủy"
+  type="danger"
+  (confirm)="confirmDelete()"
+  (cancel)="closeDeleteModal()"
+  (close)="closeDeleteModal()"
+>
+</app-modal>
+
+<!-- Success Modal -->
+<app-modal
+  [isOpen]="showSuccessModal"
+  title="Thành công!"
+  [message]="successMessage"
+  confirmText="Đóng"
+  cancelText=""
+  type="success"
+  (confirm)="closeSuccessModal()"
+  (close)="closeSuccessModal()"
+>
+</app-modal>

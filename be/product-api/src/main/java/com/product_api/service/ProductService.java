@@ -25,10 +25,16 @@ public interface ProductService {
     
     void deleteProduct(Long id);
     
+    void updateProductStatus(Long id, Boolean active);
+    
     // Business operations
     List<ProductResponseDTO> getActiveProducts();
     
     List<ProductResponseDTO> searchProductsByName(String name);
+    
+    Page<ProductResponseDTO> searchProductsWithFilters(String name, String category, String brand, Pageable pageable);
+    
+    Page<ProductResponseDTO> searchActiveProductsWithFilters(String name, String category, String brand, Pageable pageable);
     
     List<ProductResponseDTO> getProductsByCategory(String category);
     

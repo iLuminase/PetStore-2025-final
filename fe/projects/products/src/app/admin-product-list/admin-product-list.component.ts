@@ -5,12 +5,13 @@ import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AuthService, AuthState } from '../../../../shared/src/app/auth';
+import { ModalComponent } from '../../../../shared/src/app/common';
 import { Product, ProductSearchParams, ProductService } from '../../../../shared/src/app/product';
 
 @Component({
     selector: 'app-admin-product-list',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, ModalComponent],
     templateUrl: './admin-product-list.component.html',
     styleUrl: './admin-product-list.component.scss'
 })
@@ -35,6 +36,15 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
 
     // Stock management
     stockUpdateQuantity: { [key: number]: number } = {};
+
+    // Success modal (simplified)
+    showSuccessModal = false;
+    successMessage = '';
+
+    // Throttling to prevent API overload
+    private isLoading = false;
+    private lastLoadTime = 0;
+    private readonly LOAD_THROTTLE_MS = 1000; // Minimum 1 second between loads
 
     private destroy$ = new Subject<void>();
 
@@ -68,6 +78,15 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
     }
 
     loadProducts(): void {
+        // Throttling to prevent API overload
+        const now = Date.now();
+        if (this.isLoading || (now - this.lastLoadTime) < this.LOAD_THROTTLE_MS) {
+            console.log('loadProducts throttled - too frequent calls');
+            return;
+        }
+
+        this.isLoading = true;
+        this.lastLoadTime = now;
         this.loading = true;
         this.error = null;
 
@@ -85,12 +104,19 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
             params.category = this.selectedCategory;
         }
 
-        this.productService.getProducts(params).subscribe({
+        if (this.selectedBrand) {
+            params.brand = this.selectedBrand;
+        }
+
+        this.productService.getProducts(params, true).subscribe({
             next: (response) => {
+                console.log('Admin loaded products:', response.content.length, 'total elements:', response.totalElements);
+
                 this.products = response.content;
                 this.totalPages = response.totalPages;
                 this.totalElements = response.totalElements;
                 this.loading = false;
+                this.isLoading = false; // Reset loading flag
 
                 // Initialize stock update quantities
                 this.products.forEach(product => {
@@ -103,6 +129,7 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
                 console.error('Error loading products', err);
                 this.error = 'Không thể tải danh sách sản phẩm';
                 this.loading = false;
+                this.isLoading = false; // Reset loading flag
             }
         });
     }
@@ -143,6 +170,8 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
         this.loadProducts();
     }
 
+    // refreshProducts removed to prevent API overload
+
     previousPage(): void {
         if (this.currentPage > 0) {
             this.currentPage--;
@@ -178,20 +207,7 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
         );
     }
 
-    deleteProduct(productId: number): void {
-        const product = this.products.find(p => p.id === productId);
-        if (product && confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) {
-            this.productService.deleteProduct(productId).subscribe({
-                next: () => {
-                    this.loadProducts(); // Reload the list
-                },
-                error: (err: any) => {
-                    console.error('Error deleting product', err);
-                    alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
-                }
-            });
-        }
-    }
+    // Removed toggleProductStatus to prevent excessive API calls
 
     increaseStock(productId: number): void {
         const quantity = this.stockUpdateQuantity[productId] || 1;
@@ -292,9 +308,38 @@ export class AdminProductListComponent implements OnInit, OnDestroy {
         return 'Còn hàng';
     }
 
+    getActiveStatus(active?: boolean): string {
+        return active ? 'active' : 'inactive';
+    }
+
+    getActiveStatusText(active?: boolean): string {
+        return active ? 'Hoạt động' : 'Đã tắt';
+    }
+
+    getProductStatusTooltip(active?: boolean): string {
+        return active
+            ? 'Sản phẩm đang hoạt động và có thể bán được'
+            : 'Sản phẩm đã bị tắt và không thể bán';
+    }
+
+    getStockStatusTooltip(stockQuantity: number): string {
+        if (stockQuantity === 0) return 'Sản phẩm đã hết hàng - cần nhập thêm';
+        if (stockQuantity < 10) return `Còn ${stockQuantity} sản phẩm - sắp hết hàng`;
+        return `Còn ${stockQuantity} sản phẩm trong kho`;
+    }
+
     shouldShowPage(pageIndex: number): boolean {
         return pageIndex === 0 ||
             pageIndex === this.totalPages - 1 ||
             Math.abs(pageIndex - this.currentPage) <= 2;
     }
+
+    // Toggle functionality removed to prevent API overload
+
+    closeSuccessModal(): void {
+        this.showSuccessModal = false;
+        this.successMessage = '';
+    }
+
+    // getToggleMessage removed to cleanup code
 }

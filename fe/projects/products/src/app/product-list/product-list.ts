@@ -7,12 +7,13 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 // Import from shared project
 import { AuthService, AuthState } from '../../../../shared/src/app/auth';
 import { AddToCartRequest, CartService } from '../../../../shared/src/app/cart';
+import { ModalComponent } from '../../../../shared/src/app/common';
 import { Product, ProductSearchParams, ProductService } from '../../../../shared/src/app/product';
 
 @Component({
   selector: 'app-products-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ModalComponent],
   templateUrl: './product-list.html',
   styleUrl: './product-list.scss'
 })
@@ -31,7 +32,15 @@ export class ProductList implements OnInit, OnDestroy {
   // Search and filter
   searchTerm = '';
   selectedCategory = '';
+  selectedBrand = '';
   categories: string[] = [];
+  brands: string[] = [];
+
+  // Delete modal
+  showDeleteModal = false;
+  productToDelete: Product | null = null;
+  showSuccessModal = false;
+  successMessage = '';
 
   private destroy$ = new Subject<void>();
 
@@ -47,6 +56,7 @@ export class ProductList implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadProducts();
     this.loadCategories();
+    this.loadBrands();
 
     // Subscribe to auth state
     this.authService.authState$
@@ -126,6 +136,10 @@ export class ProductList implements OnInit, OnDestroy {
       params.category = this.selectedCategory;
     }
 
+    if (this.selectedBrand) {
+      params.brand = this.selectedBrand;
+    }
+
     this.productService.getProducts(params).subscribe({
       next: (response) => {
         this.products = response.content;
@@ -146,12 +160,24 @@ export class ProductList implements OnInit, OnDestroy {
     });
   }
 
+  loadBrands(): void {
+    this.productService.getBrands().subscribe({
+      next: (brands) => this.brands = brands,
+      error: (err) => console.error('Error loading brands', err)
+    });
+  }
+
   onSearch(): void {
     this.currentPage = 0;
     this.loadProducts();
   }
 
   onCategoryChange(): void {
+    this.currentPage = 0;
+    this.loadProducts();
+  }
+
+  onBrandChange(): void {
     this.currentPage = 0;
     this.loadProducts();
   }
@@ -187,5 +213,44 @@ export class ProductList implements OnInit, OnDestroy {
   handleImageError(event: any): void {
     // Set placeholder image on error
     event.target.src = '/assets/images/placeholder-product.svg';
+  }
+
+  openDeleteModal(product: Product): void {
+    this.productToDelete = product;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.productToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (this.productToDelete) {
+      this.productService.deleteProduct(this.productToDelete.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.successMessage = `Sản phẩm "${this.productToDelete?.name}" đã được xóa thành công!`;
+            this.showSuccessModal = true;
+            this.closeDeleteModal();
+            this.loadProducts(); // Reload products after delete
+          },
+          error: (error) => {
+            console.error('Error deleting product:', error);
+            alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
+            this.closeDeleteModal();
+          }
+        });
+    }
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+    this.successMessage = '';
+  }
+
+  getDeleteMessage(): string {
+    return `Bạn có chắc chắn muốn xóa sản phẩm "${this.productToDelete?.name || ''}"? Hành động này không thể hoàn tác.`;
   }
 }

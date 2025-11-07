@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.product_api.dto.ProductCreateDTO;
 import com.product_api.dto.ProductResponseDTO;
+import com.product_api.dto.ProductStatusUpdateDTO;
 import com.product_api.dto.ProductUpdateDTO;
 import com.product_api.service.ProductService;
 
@@ -58,14 +60,26 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
     
-    // Get all products with pagination
+    // Get all products with pagination and optional filters
     @GetMapping
     public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false, defaultValue = "false") boolean includeInactive) {
         try {
+            // DEBUG: Log all parameters
+            System.out.println("=== getAllProducts called ===");
+            System.out.println("name: " + name);
+            System.out.println("category: " + category);
+            System.out.println("brand: " + brand);
+            System.out.println("includeInactive: " + includeInactive);
+            System.out.println("page: " + page + ", size: " + size);
+            
             // Validate pagination parameters
             if (page < 0) page = 0;
             if (size < 1 || size > 100) size = 10;
@@ -74,7 +88,21 @@ public class ProductController {
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
             Pageable pageable = PageRequest.of(page, size, sort);
             
-            Page<ProductResponseDTO> products = productService.getAllProducts(pageable);
+            Page<ProductResponseDTO> products;
+            
+            // Check if any filters are provided
+            if (name != null || category != null || brand != null) {
+                // Use appropriate filter method based on includeInactive flag
+                if (includeInactive) {
+                    products = productService.searchProductsWithFilters(name, category, brand, pageable);
+                    System.out.println("Admin searched products with filters - name: " + name + ", category: " + category + ", brand: " + brand);
+                } else {
+                    products = productService.searchActiveProductsWithFilters(name, category, brand, pageable);
+                    System.out.println("User searched active products with filters - name: " + name + ", category: " + category + ", brand: " + brand);
+                }
+            } else {
+                products = productService.getAllProducts(pageable);
+            }
             
             // Log for debugging
             System.out.println("Loaded " + products.getContent().size() + " products, page " + page);
@@ -138,6 +166,22 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    
+    // Update product status (activate/deactivate)
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> updateProductStatus(@PathVariable Long id, @RequestBody ProductStatusUpdateDTO statusUpdate) {
+        try {
+            Boolean active = statusUpdate.getActive();
+            if (active != null) {
+                productService.updateProductStatus(id, active);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            e.printStackTrace(); // Add logging để debug
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
     // Search products by name

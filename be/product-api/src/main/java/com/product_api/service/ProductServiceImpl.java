@@ -77,6 +77,16 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
+    public void updateProductStatus(Long id, Boolean active) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+        
+        // Update active status
+        product.setActive(active);
+        productRepository.save(product);
+    }
+    
+    @Override
     @Transactional(readOnly = true)
     public List<ProductResponseDTO> getActiveProducts() {
         List<Product> products = productRepository.findByActiveTrue();
@@ -92,6 +102,20 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDTO> searchProductsWithFilters(String name, String category, String brand, Pageable pageable) {
+        Page<Product> products = productRepository.findProductsWithFilters(name, category, brand, pageable);
+        return products.map(this::convertToResponseDTO);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDTO> searchActiveProductsWithFilters(String name, String category, String brand, Pageable pageable) {
+        Page<Product> products = productRepository.findActiveProductsWithFilters(name, category, brand, pageable);
+        return products.map(this::convertToResponseDTO);
     }
     
     @Override

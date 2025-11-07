@@ -1,0 +1,42 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onBackdropClick($event)">
+  <div class="modal-container" [class]="'modal-' + type">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ title }}</h3>
+      <button class="close-btn" (click)="onClose()" aria-label="Đóng">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-icon">
+        <span
+          class="icon"
+          [ngClass]="{
+            'icon-success': type === 'success',
+            'icon-warning': type === 'warning',
+            'icon-danger': type === 'danger',
+            'icon-info': type === 'info'
+          }"
+        >
+          <ng-container [ngSwitch]="type">
+            <span *ngSwitchCase="'success'">✓</span>
+            <span *ngSwitchCase="'warning'">⚠</span>
+            <span *ngSwitchCase="'danger'">⚠</span>
+            <span *ngSwitchCase="'info'">ℹ</span>
+            <span *ngSwitchDefault>ℹ</span>
+          </ng-container>
+        </span>
+      </div>
+      <p class="modal-message">{{ message }}</p>
+    </div>
+
+    <div class="modal-footer">
+      <button *ngIf="cancelText" class="btn btn-secondary" (click)="onCancel()">
+        {{ cancelText }}
+      </button>
+      <button class="btn" [class]="'btn-' + type" (click)="onConfirm()">
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

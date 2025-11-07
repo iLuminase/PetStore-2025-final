@@ -27,7 +27,7 @@ export class ProductService {
     /**
      * Get all products with pagination and search
      */
-    getProducts(params?: ProductSearchParams): Observable<ProductResponse> {
+    getProducts(params?: ProductSearchParams, includeInactive: boolean = false): Observable<ProductResponse> {
         this.loadingSubject.next(true);
 
         let httpParams = new HttpParams();
@@ -35,6 +35,7 @@ export class ProductService {
         if (params) {
             if (params.name) httpParams = httpParams.set('name', params.name);
             if (params.category) httpParams = httpParams.set('category', params.category);
+            if (params.brand) httpParams = httpParams.set('brand', params.brand);
             if (params.minPrice !== undefined) httpParams = httpParams.set('minPrice', params.minPrice.toString());
             if (params.maxPrice !== undefined) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
             if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
@@ -47,6 +48,11 @@ export class ProductService {
                 httpParams = httpParams.set('sortBy', sortBy);
                 httpParams = httpParams.set('sortDir', sortDir);
             }
+        }
+
+        // Add includeInactive parameter for admin views
+        if (includeInactive) {
+            httpParams = httpParams.set('includeInactive', 'true');
         }
 
         return this.http.get<ProductResponse>(this.apiUrl, { params: httpParams })
@@ -103,6 +109,8 @@ export class ProductService {
                 })
             );
     }
+
+    // updateProductStatus removed to prevent excessive API calls and overload
 
     /**
      * Search products by name

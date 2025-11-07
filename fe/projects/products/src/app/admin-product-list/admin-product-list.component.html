@@ -56,6 +56,7 @@
 
       <div class="filter-actions">
         <button (click)="clearFilters()" class="clear-btn">Xóa bộ lọc</button>
+        <!-- Refresh button removed to prevent API overload -->
       </div>
     </div>
   </div>
@@ -89,7 +90,7 @@
           <th>Tồn kho</th>
           <th>Trạng thái</th>
           <th>Quản lý kho</th>
-          <th>Thao tác</th>
+          <th>Chỉnh sửa</th>
         </tr>
       </thead>
       <tbody>
@@ -140,12 +141,32 @@
 
           <!-- Status -->
           <td>
-            <span
-              class="status-badge"
-              [class]="getStockStatus(product.stockQuantity)"
-            >
-              {{ getStockStatusText(product.stockQuantity) }}
-            </span>
+            <div class="status-column">
+              <div class="status-badges">
+                <span
+                  class="status-badge product-status"
+                  [class]="getActiveStatus(product.active)"
+                  [title]="getProductStatusTooltip(product.active)"
+                >
+                  <i
+                    class="status-icon"
+                    [class]="getActiveStatus(product.active)"
+                  ></i>
+                  {{ getActiveStatusText(product.active) }}
+                </span>
+                <span
+                  class="stock-status"
+                  [class]="getStockStatus(product.stockQuantity)"
+                  [title]="getStockStatusTooltip(product.stockQuantity)"
+                >
+                  <i
+                    class="stock-icon"
+                    [class]="getStockStatus(product.stockQuantity)"
+                  ></i>
+                  {{ getStockStatusText(product.stockQuantity) }}
+                </span>
+              </div>
+            </div>
           </td>
 
           <!-- Stock Management -->
@@ -205,13 +226,6 @@
                 [disabled]="!product.id"
               >
                 ✏️
-              </button>
-              <button
-                (click)="deleteProduct(product.id)"
-                class="action-btn delete"
-                title="Xóa"
-              >
-                🗑️
               </button>
             </div>
           </td>
@@ -279,3 +293,18 @@
     </button>
   </div>
 </div>
+
+<!-- Toggle modal removed to prevent excessive API calls -->
+
+<!-- Success Modal -->
+<app-modal
+  [isOpen]="showSuccessModal"
+  title="Thành công!"
+  [message]="successMessage"
+  confirmText="Đóng"
+  cancelText=""
+  type="success"
+  (confirm)="closeSuccessModal()"
+  (close)="closeSuccessModal()"
+>
+</app-modal>

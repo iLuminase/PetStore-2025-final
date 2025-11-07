@@ -7,6 +7,7 @@ export interface Product {
     category: string;
     imageUrl?: string;
     brand?: string;
+    active?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -28,6 +29,7 @@ export interface ProductUpdateRequest extends Partial<ProductCreateRequest> {
 export interface ProductSearchParams {
     name?: string;
     category?: string;
+    brand?: string;
     minPrice?: number;
     maxPrice?: number;
     page?: number;

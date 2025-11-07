@@ -43,6 +43,27 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND p.active = true")
     Page<Product> searchProducts(@Param("searchTerm") String searchTerm, Pageable pageable);
     
+    // Search products with multiple filters (for admin - shows all products including inactive)
+    @Query("SELECT p FROM Product p LEFT JOIN p.category c WHERE " +
+           "(:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+           "(:category IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+           "(:brand IS NULL OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%')))")
+    Page<Product> findProductsWithFilters(@Param("name") String name, 
+                                        @Param("category") String category, 
+                                        @Param("brand") String brand, 
+                                        Pageable pageable);
+    
+    // Search active products with multiple filters (for users - shows only active products)
+    @Query("SELECT p FROM Product p LEFT JOIN p.category c WHERE " +
+           "(:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+           "(:category IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+           "(:brand IS NULL OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
+           "p.active = true")
+    Page<Product> findActiveProductsWithFilters(@Param("name") String name, 
+                                               @Param("category") String category, 
+                                               @Param("brand") String brand, 
+                                               Pageable pageable);
+    
     // Find products with low stock (sorted by newest first)
     @Query("SELECT p FROM Product p WHERE p.stock <= :threshold AND p.active = true ORDER BY p.createdAt DESC")
     List<Product> findLowStockProducts(@Param("threshold") Integer threshold);
@@ -51,12 +72,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT DISTINCT p.categoryId FROM Product p WHERE p.active = true AND p.categoryId IS NOT NULL")
     List<Long> findDistinctCategoryIds();
     
-    // Get all distinct brands
-    @Query("SELECT DISTINCT p.brand FROM Product p WHERE p.active = true AND p.brand IS NOT NULL")
+    // Get all distinct brands (including from inactive products for admin)
+    @Query("SELECT DISTINCT p.brand FROM Product p WHERE p.brand IS NOT NULL ORDER BY p.brand")
     List<String> findDistinctBrands();
     
-    // Get all categories with their names (using join)
-    @Query("SELECT c.name FROM Product p JOIN p.category c WHERE p.active = true AND c.active = true GROUP BY c.name")
+    // Get all categories with their names (using join) - including inactive for admin
+    @Query("SELECT DISTINCT c.name FROM Product p JOIN p.category c WHERE c.name IS NOT NULL GROUP BY c.name ORDER BY c.name")
     List<String> findDistinctCategoryNames();
     
     // Find by ID and active
