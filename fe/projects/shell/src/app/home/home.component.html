@@ -122,80 +122,62 @@
   </div>
 </section>
 
-<!-- Popular Products -->
+<!-- Latest Products -->
 <section class="products-section">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Popular Products</h2>
-      <p class="section-description">Best sellers loved by pets and owners</p>
+      <h2 class="section-title">Sản phẩm mới nhất</h2>
+      <p class="section-description">Những sản phẩm mới được cập nhật</p>
     </div>
-    <div class="products-grid">
-      <div class="product-card">
-        <div class="product-badge">New</div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <p>Đang tải sản phẩm...</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" *ngIf="!loading && latestProducts.length > 0">
+      <div
+        class="product-card"
+        *ngFor="let product of latestProducts"
+        [routerLink]="['/products/product', product.id]"
+      >
+        <div class="product-badge">Mới</div>
         <div class="product-image">
-          <i class="bi bi-box-seam"></i>
+          <img
+            [src]="getProductImageUrl(product)"
+            [alt]="product.name"
+            (error)="
+              $event.target.src = '/assets/images/placeholder-product.svg'
+            "
+          />
         </div>
         <div class="product-info">
-          <h3>Premium Dog Food</h3>
-          <p class="product-description">High-quality nutrition</p>
+          <h3>{{ product.name }}</h3>
+          <p class="product-description">
+            {{ product.description | slice : 0 : 50
+            }}{{ product.description.length > 50 ? "..." : "" }}
+          </p>
           <div class="product-footer">
-            <span class="product-price">$29.99</span>
-            <button class="btn-add-cart">
-              <i class="bi bi-cart-plus"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-badge sale">Sale</div>
-        <div class="product-image">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="product-info">
-          <h3>Cat Dry Food</h3>
-          <p class="product-description">Complete nutrition</p>
-          <div class="product-footer">
-            <span class="product-price">$24.99</span>
-            <button class="btn-add-cart">
-              <i class="bi bi-cart-plus"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-image">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="product-info">
-          <h3>Pet Treats Pack</h3>
-          <p class="product-description">Tasty rewards</p>
-          <div class="product-footer">
-            <span class="product-price">$12.99</span>
-            <button class="btn-add-cart">
-              <i class="bi bi-cart-plus"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-image">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="product-info">
-          <h3>Pet Water Bowl</h3>
-          <p class="product-description">Stainless steel</p>
-          <div class="product-footer">
-            <span class="product-price">$15.99</span>
-            <button class="btn-add-cart">
+            <span class="product-price">{{
+              product.price | currency : "VND" : "symbol" : "1.0-0"
+            }}</span>
+            <button class="btn-add-cart" (click)="$event.stopPropagation()">
               <i class="bi bi-cart-plus"></i>
             </button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && latestProducts.length === 0" class="empty-state">
+      <p>Chưa có sản phẩm nào</p>
+    </div>
+
     <div class="view-all-container">
       <button class="btn btn-outline-large" routerLink="/products">
-        View All Products
+        Xem tất cả sản phẩm
         <i class="bi bi-arrow-right"></i>
       </button>
     </div>

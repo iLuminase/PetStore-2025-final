@@ -259,7 +259,8 @@ public class ProductServiceImpl implements ProductService {
         product.setStockQuantity(dto.getStockQuantity());
         // Note: DTO expects category name (String) but DB has categoryId (Long)
         // For now, skip category mapping until Category table relationship is established
-        product.setBrand(dto.getBrand());
+        // TODO: Implement category name -> categoryId mapping
+        // Skip brand for now as well
         product.setImageUrl(dto.getImageUrl());
         return product;
     }

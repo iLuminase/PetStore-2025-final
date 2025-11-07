@@ -14,7 +14,7 @@ module.exports = withNativeFederation({
   shared: {
     ...shareAll({
       singleton: true,
-      strictVersion: true,
+      strictVersion: false,
       requiredVersion: "auto",
     }),
   },

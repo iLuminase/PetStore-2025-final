@@ -111,6 +111,14 @@
             <mat-icon>receipt</mat-icon>
             <span>Đơn hàng</span>
           </button>
+          <button
+            mat-menu-item
+            (click)="router.navigate(['/admin/dashboard'])"
+            *ngIf="hasAdminRole()"
+          >
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Quản trị hệ thống</span>
+          </button>
           <button mat-menu-item (click)="onLogout()">
             <mat-icon>logout</mat-icon>
             <span>Đăng xuất</span>

@@ -43,8 +43,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND p.active = true")
     Page<Product> searchProducts(@Param("searchTerm") String searchTerm, Pageable pageable);
     
-    // Find products with low stock
-    @Query("SELECT p FROM Product p WHERE p.stock <= :threshold AND p.active = true")
+    // Find products with low stock (sorted by newest first)
+    @Query("SELECT p FROM Product p WHERE p.stock <= :threshold AND p.active = true ORDER BY p.createdAt DESC")
     List<Product> findLowStockProducts(@Param("threshold") Integer threshold);
     
     // Get all distinct categoryIds

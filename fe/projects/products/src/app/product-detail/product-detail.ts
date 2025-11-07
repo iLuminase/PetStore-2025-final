@@ -76,16 +76,17 @@ export class ProductDetail implements OnInit, OnDestroy {
   getProductImageUrl(): string {
     if (!this.product) return '/assets/images/placeholder-product.svg';
 
-    // Priority: imageUrl from product, then DB image endpoint, then placeholder
-    if (this.product.imageUrl) {
-      // If it's already a full URL or starts with /, use it directly
-      if (this.product.imageUrl.startsWith('http') || this.product.imageUrl.startsWith('/api/products/')) {
-        return 'http://localhost:8080' + this.product.imageUrl;
+    // Priority: 1. External URL -> 2. Database image -> 3. Placeholder
+    if (this.product.imageUrl && this.product.imageUrl.trim()) {
+      // If it's already a full URL, use it directly
+      if (this.product.imageUrl.startsWith('http')) {
+        return this.product.imageUrl;
       }
+      // If it's a relative path, use it directly
       return this.product.imageUrl;
     }
-    // Fallback to placeholder
-    return '/assets/images/placeholder-product.svg';
+    // Fallback to database image if no external imageUrl
+    return this.productService.getProductImageUrl(this.product.id);
   }
 
   handleImageError(event: any): void {

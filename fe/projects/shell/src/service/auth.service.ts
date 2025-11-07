@@ -55,6 +55,18 @@ export class AuthService {
   public hasRole(role: string): boolean {
     return this.keycloak.getUserRoles().includes(role);
   }
+
+  public hasGroup(groupName: string): boolean {
+    // Check if user belongs to a specific group
+    const tokenParsed = this.keycloak.getKeycloakInstance().tokenParsed;
+    return tokenParsed?.['groups']?.includes(`/${groupName}`) || false;
+  }
+
+  public isAdmin(): boolean {
+    // Check if user has ADMIN role OR belongs to admin_access group
+    return this.hasRole('ADMIN') || this.hasGroup('admin_access');
+  }
+
   public refreshToken() {
     return this.keycloak.updateToken(5);
   }

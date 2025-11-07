@@ -174,13 +174,23 @@ export class CartComponent implements OnInit, OnDestroy {
   getCartItemImageUrl(item: CartItem): string {
     // Priority: productImageUrl, productImage, then placeholder
     if (item.productImageUrl) {
-      if (item.productImageUrl.startsWith('http') || item.productImageUrl.startsWith('/api/products/')) {
+      // If it's already a full URL, use it directly
+      if (item.productImageUrl.startsWith('http')) {
+        return item.productImageUrl;
+      }
+      // If it starts with /api/products/, prepend the API base URL
+      if (item.productImageUrl.startsWith('/api/products/')) {
         return 'http://localhost:8080' + item.productImageUrl;
       }
       return item.productImageUrl;
     }
     if (item.productImage) {
-      if (item.productImage.startsWith('http') || item.productImage.startsWith('/api/products/')) {
+      // If it's already a full URL, use it directly
+      if (item.productImage.startsWith('http')) {
+        return item.productImage;
+      }
+      // If it starts with /api/products/, prepend the API base URL
+      if (item.productImage.startsWith('/api/products/')) {
         return 'http://localhost:8080' + item.productImage;
       }
       return item.productImage;

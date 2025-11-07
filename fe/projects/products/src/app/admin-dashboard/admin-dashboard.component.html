@@ -1,0 +1,192 @@
+<div
+  class="admin-dashboard"
+  *ngIf="authState && userHasRole(['ADMIN', 'MANAGER'])"
+>
+  <div class="dashboard-header">
+    <h1>🛠️ Admin Dashboard</h1>
+    <p>Quản lý sản phẩm Pet Store</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadDashboardData()" class="retry-btn">Thử lại</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Thao tác nhanh</h2>
+      <div class="action-buttons">
+        <button class="action-btn primary" (click)="navigateToCreateProduct()">
+          <i class="icon">➕</i>
+          <span>Thêm sản phẩm</span>
+        </button>
+        <button class="action-btn secondary" (click)="navigateToProducts()">
+          <i class="icon">📋</i>
+          <span>Quản lý sản phẩm</span>
+        </button>
+        <button class="action-btn warning" (click)="navigateToLowStock()">
+          <i class="icon">⚠️</i>
+          <span>Sản phẩm sắp hết</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <h3>{{ totalProducts }}</h3>
+          <p>Tổng sản phẩm</p>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-content">
+          <h3>{{ lowStockProducts }}</h3>
+          <p>Sản phẩm sắp hết</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🏷️</div>
+        <div class="stat-content">
+          <h3>{{ categories.length }}</h3>
+          <p>Danh mục</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-content">
+          <h3>{{ brands.length }}</h3>
+          <p>Thương hiệu</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Products -->
+    <div class="recent-section">
+      <div class="section-header">
+        <h2>Sản phẩm mới nhất</h2>
+        <button class="view-all-btn" (click)="navigateToProducts()">
+          Xem tất cả →
+        </button>
+      </div>
+
+      <div class="products-table" *ngIf="recentProducts.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Hình ảnh</th>
+              <th>Tên sản phẩm</th>
+              <th>Danh mục</th>
+              <th>Giá</th>
+              <th>Tồn kho</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of recentProducts">
+              <td>
+                <div class="product-image">
+                  <img
+                    [src]="
+                      product.imageUrl ||
+                      '/assets/images/placeholder-product.svg'
+                    "
+                    [alt]="product.name"
+                    (error)="
+                      $event.target.src =
+                        '/assets/images/placeholder-product.svg'
+                    "
+                  />
+                </div>
+              </td>
+              <td>
+                <div class="product-name">
+                  <a [routerLink]="['/products/product', product.id]">
+                    {{ product.name }}
+                  </a>
+                </div>
+              </td>
+              <td>{{ product.category }}</td>
+              <td>
+                {{ product.price | currency : "VND" : "symbol" : "1.0-0" }}
+              </td>
+              <td>
+                <span class="stock" [class.low]="product.stockQuantity < 10">
+                  {{ product.stockQuantity }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="status"
+                  [class.active]="product.stockQuantity > 0"
+                  [class.inactive]="product.stockQuantity === 0"
+                >
+                  {{ product.stockQuantity > 0 ? "Còn hàng" : "Hết hàng" }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="recentProducts.length === 0" class="no-products">
+        <p>Chưa có sản phẩm nào</p>
+      </div>
+    </div>
+
+    <!-- Categories & Brands Overview -->
+    <div class="overview-grid">
+      <div class="overview-card">
+        <h3>Danh mục sản phẩm</h3>
+        <div class="category-list">
+          <span *ngFor="let category of categories" class="category-tag">
+            {{ category }}
+          </span>
+        </div>
+        <div *ngIf="categories.length === 0" class="empty-state">
+          Chưa có danh mục nào
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <h3>Thương hiệu</h3>
+        <div class="brand-list">
+          <span *ngFor="let brand of brands" class="brand-tag">
+            {{ brand }}
+          </span>
+        </div>
+        <div *ngIf="brands.length === 0" class="empty-state">
+          Chưa có thương hiệu nào
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Access Denied -->
+<div
+  *ngIf="authState && !userHasRole(['ADMIN', 'MANAGER'])"
+  class="access-denied"
+>
+  <div class="access-denied-content">
+    <h2>🚫 Truy cập bị từ chối</h2>
+    <p>Bạn không có quyền truy cập trang quản trị này.</p>
+    <button routerLink="/products" class="back-btn">
+      ← Quay lại trang sản phẩm
+    </button>
+  </div>
+</div>

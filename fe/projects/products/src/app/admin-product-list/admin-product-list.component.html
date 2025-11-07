@@ -1,0 +1,281 @@
+<div
+  class="admin-product-list"
+  *ngIf="authState && userHasRole(['ADMIN', 'MANAGER'])"
+>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="navigateToDashboard()">
+        ← Dashboard
+      </button>
+      <div class="header-text">
+        <h1>📋 Quản lý sản phẩm</h1>
+        <p>Danh sách tất cả sản phẩm trong hệ thống</p>
+      </div>
+    </div>
+    <button class="create-btn" (click)="navigateToCreate()">
+      ➕ Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>Tìm kiếm</label>
+        <div class="search-box">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Tìm theo tên sản phẩm..."
+            (keyup.enter)="onSearch()"
+          />
+          <button (click)="onSearch()" class="search-btn">🔍</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Danh mục</label>
+        <select [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+          <option value="">Tất cả danh mục</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Thương hiệu</label>
+        <select [(ngModel)]="selectedBrand" (change)="onCategoryChange()">
+          <option value="">Tất cả thương hiệu</option>
+          <option *ngFor="let brand of brands" [value]="brand">
+            {{ brand }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button (click)="clearFilters()" class="clear-btn">Xóa bộ lọc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Info -->
+  <div class="results-info" *ngIf="!loading">
+    <p>Hiển thị {{ products.length }} / {{ totalElements }} sản phẩm</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Đang tải danh sách sản phẩm...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadProducts()" class="retry-btn">Thử lại</button>
+  </div>
+
+  <!-- Products Table -->
+  <div *ngIf="!loading && !error" class="products-table-container">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Hình ảnh</th>
+          <th>Sản phẩm</th>
+          <th>Danh mục</th>
+          <th>Giá</th>
+          <th>Tồn kho</th>
+          <th>Trạng thái</th>
+          <th>Quản lý kho</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products" class="product-row">
+          <!-- Product Image -->
+          <td>
+            <div class="product-image">
+              <img
+                [src]="getProductImageUrl(product)"
+                [alt]="product.name"
+                (error)="handleImageError($event)"
+              />
+            </div>
+          </td>
+
+          <!-- Product Info -->
+          <td>
+            <div class="product-info">
+              <h4>{{ product.name }}</h4>
+              <p>
+                {{ product.description | slice : 0 : 100
+                }}{{ product.description.length > 100 ? "..." : "" }}
+              </p>
+              <span class="brand" *ngIf="product.brand">{{
+                product.brand
+              }}</span>
+            </div>
+          </td>
+
+          <!-- Category -->
+          <td>
+            <span class="category-badge">{{ product.category }}</span>
+          </td>
+
+          <!-- Price -->
+          <td>
+            <div class="price">
+              {{ product.price | currency : "VND" : "symbol" : "1.0-0" }}
+            </div>
+          </td>
+
+          <!-- Stock -->
+          <td>
+            <div class="stock-info">
+              <span class="stock-number">{{ product.stockQuantity }}</span>
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td>
+            <span
+              class="status-badge"
+              [class]="getStockStatus(product.stockQuantity)"
+            >
+              {{ getStockStatusText(product.stockQuantity) }}
+            </span>
+          </td>
+
+          <!-- Stock Management -->
+          <td>
+            <div class="stock-controls">
+              <div class="quantity-input">
+                <input
+                  type="number"
+                  [(ngModel)]="stockUpdateQuantity[product.id]"
+                  min="1"
+                  placeholder="Số lượng"
+                />
+              </div>
+              <div class="stock-buttons">
+                <button
+                  (click)="increaseStock(product.id)"
+                  class="stock-btn increase"
+                  title="Tăng tồn kho"
+                >
+                  ➕
+                </button>
+                <button
+                  (click)="decreaseStock(product.id)"
+                  class="stock-btn decrease"
+                  title="Giảm tồn kho"
+                  [disabled]="product.stockQuantity === 0"
+                >
+                  ➖
+                </button>
+              </div>
+              <div class="set-stock">
+                <input
+                  type="number"
+                  #newStockInput
+                  [value]="product.stockQuantity"
+                  min="0"
+                  placeholder="Đặt tồn kho"
+                />
+                <button
+                  (click)="setStock(product.id, +newStockInput.value)"
+                  class="set-stock-btn"
+                  title="Đặt số lượng tồn kho"
+                >
+                  Set
+                </button>
+              </div>
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td>
+            <div class="action-buttons">
+              <button
+                (click)="editProduct(product.id)"
+                class="action-btn edit"
+                title="Chỉnh sửa"
+                [disabled]="!product.id"
+              >
+                ✏️
+              </button>
+              <button
+                (click)="deleteProduct(product.id)"
+                class="action-btn delete"
+                title="Xóa"
+              >
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="products.length === 0" class="empty-state">
+      <div class="empty-content">
+        <div class="empty-icon">📦</div>
+        <h3>Không có sản phẩm nào</h3>
+        <p>Không tìm thấy sản phẩm nào phù hợp với bộ lọc hiện tại.</p>
+        <button (click)="clearFilters()" class="clear-filters-btn">
+          Xóa bộ lọc
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && !error && totalPages > 1" class="pagination">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 0"
+      class="page-btn"
+    >
+      ‹ Trước
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        (click)="goToPage(i)"
+        class="page-number"
+        [class.active]="i === currentPage"
+        [class.show]="shouldShowPage(i)"
+      >
+        {{ i + 1 }}
+      </button>
+    </div>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1"
+      class="page-btn"
+    >
+      Sau ›
+    </button>
+
+    <div class="page-info">Trang {{ currentPage + 1 }} / {{ totalPages }}</div>
+  </div>
+</div>
+
+<!-- Access Denied -->
+<div
+  *ngIf="authState && !userHasRole(['ADMIN', 'MANAGER'])"
+  class="access-denied"
+>
+  <div class="access-denied-content">
+    <h2>🚫 Truy cập bị từ chối</h2>
+    <p>Bạn không có quyền quản lý sản phẩm.</p>
+    <button routerLink="/products" class="back-btn">
+      ← Quay lại trang sản phẩm
+    </button>
+  </div>
+</div>

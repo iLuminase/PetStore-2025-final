@@ -2,20 +2,25 @@
 // Bootstrap and other libraries are loaded in index.html
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Roboto", sans-serif;
   font-weight: 700;
 }
 
 .text-primary {
-  color: #FF6F61 !important;
+  color: #ff6f61 !important;
 }
 
 .bg-primary {
-  background-color: #FF6F61 !important;
+  background-color: #ff6f61 !important;
 }
 
 // ============================================
@@ -264,75 +269,126 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-card {
   background: white;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+    .product-image img {
+      transform: scale(1.05);
+    }
+
+    .btn-add-cart {
+      background-color: #5a67d8;
+      transform: scale(1.1);
+    }
+  }
 
   .product-badge {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background-color: #ff6f61;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
     color: white;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
+    padding: 0.5rem 1.2rem;
+    border-radius: 25px;
     font-size: 0.85rem;
-    font-weight: 600;
-    z-index: 1;
+    font-weight: 700;
+    z-index: 2;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 
     &.sale {
-      background-color: #4caf50;
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
     }
   }
 
   .product-image {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 280px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4f8 100%);
 
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    /* Fallback icon styling */
     i {
-      font-size: 5rem;
-      color: #ccc;
+      font-size: 4rem;
+      color: #cbd5e0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   }
 
   .product-info {
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
+    position: relative;
 
     h3 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .product-description {
-      color: #7f8c8d;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
+      color: #718096;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .product-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: auto;
 
       .product-price {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #ff6f61;
+        font-size: 1.6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .btn-add-cart {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         border: none;
-        background-color: #667eea;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         color: white;
         cursor: pointer;
         transition: all 0.3s ease;

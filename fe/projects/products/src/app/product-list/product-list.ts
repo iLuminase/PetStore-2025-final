@@ -114,7 +114,8 @@ export class ProductList implements OnInit, OnDestroy {
   loadProducts(): void {
     const params: ProductSearchParams = {
       page: this.currentPage,
-      size: this.pageSize
+      size: this.pageSize,
+      sort: 'createdAt,desc' // Sản phẩm mới nhất lên đầu
     };
 
     if (this.searchTerm) {
@@ -170,16 +171,17 @@ export class ProductList implements OnInit, OnDestroy {
   }
 
   getProductImageUrl(product: Product): string {
-    // Priority: imageUrl from product, then DB image endpoint, then placeholder
-    if (product.imageUrl) {
-      // If it's already a full URL or starts with /, use it directly
-      if (product.imageUrl.startsWith('http') || product.imageUrl.startsWith('/api/products/')) {
-        return 'http://localhost:8080' + product.imageUrl;
+    // Priority: 1. External URL -> 2. Database image -> 3. Placeholder
+    if (product.imageUrl && product.imageUrl.trim()) {
+      // If it's already a full URL, use it directly
+      if (product.imageUrl.startsWith('http')) {
+        return product.imageUrl;
       }
+      // If it's a relative path, use it directly
       return product.imageUrl;
     }
-    // Fallback to placeholder
-    return '/assets/images/placeholder-product.svg';
+    // Fallback to database image if no external imageUrl
+    return this.productService.getProductImageUrl(product.id);
   }
 
   handleImageError(event: any): void {

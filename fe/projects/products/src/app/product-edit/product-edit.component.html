@@ -1,0 +1,286 @@
+<div class="edit-product-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-button" (click)="goBack()">
+      <i class="material-icons">arrow_back</i>
+      Quay lại
+    </button>
+    <h1>
+      <i class="material-icons">edit</i>
+      Chỉnh sửa sản phẩm
+    </h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <p>Đang tải thông tin sản phẩm...</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card" *ngIf="!loading">
+    <form
+      [formGroup]="productForm"
+      (ngSubmit)="onSubmit()"
+      class="product-form"
+    >
+      <!-- Product Name -->
+      <div class="input-group">
+        <label for="name">Tên sản phẩm</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          placeholder="Nhập tên sản phẩm"
+          [class.error]="
+            productForm.get('name')?.invalid && productForm.get('name')?.touched
+          "
+        />
+        <div
+          class="error-message"
+          *ngIf="
+            productForm.get('name')?.invalid && productForm.get('name')?.touched
+          "
+        >
+          {{ getFieldError("name") }}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="input-group">
+        <label for="description">Mô tả</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          placeholder="Nhập mô tả sản phẩm"
+          rows="3"
+          [class.error]="
+            productForm.get('description')?.invalid &&
+            productForm.get('description')?.touched
+          "
+        ></textarea>
+        <div
+          class="error-message"
+          *ngIf="
+            productForm.get('description')?.invalid &&
+            productForm.get('description')?.touched
+          "
+        >
+          {{ getFieldError("description") }}
+        </div>
+      </div>
+
+      <!-- Price and Stock Row -->
+      <div class="row">
+        <div class="input-group half">
+          <label for="price">Giá (VNĐ)</label>
+          <input
+            type="number"
+            id="price"
+            formControlName="price"
+            placeholder="0"
+            min="0"
+            step="0.01"
+            [class.error]="
+              productForm.get('price')?.invalid &&
+              productForm.get('price')?.touched
+            "
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              productForm.get('price')?.invalid &&
+              productForm.get('price')?.touched
+            "
+          >
+            {{ getFieldError("price") }}
+          </div>
+        </div>
+
+        <div class="input-group half">
+          <label for="stockQuantity">Số lượng</label>
+          <input
+            type="number"
+            id="stockQuantity"
+            formControlName="stockQuantity"
+            placeholder="0"
+            min="0"
+            [class.error]="
+              productForm.get('stockQuantity')?.invalid &&
+              productForm.get('stockQuantity')?.touched
+            "
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              productForm.get('stockQuantity')?.invalid &&
+              productForm.get('stockQuantity')?.touched
+            "
+          >
+            {{ getFieldError("stockQuantity") }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Category and Brand Row -->
+      <div class="row">
+        <div class="input-group half">
+          <label for="category">Danh mục (tùy chọn)</label>
+          <select
+            id="category"
+            formControlName="category"
+            [class.error]="
+              productForm.get('category')?.invalid &&
+              productForm.get('category')?.touched
+            "
+          >
+            <option value="">Chọn danh mục</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+          <div
+            class="error-message"
+            *ngIf="
+              productForm.get('category')?.invalid &&
+              productForm.get('category')?.touched
+            "
+          >
+            {{ getFieldError("category") }}
+          </div>
+        </div>
+
+        <div class="input-group half">
+          <label for="brand">Thương hiệu (tùy chọn)</label>
+          <select
+            id="brand"
+            formControlName="brand"
+            [class.error]="
+              productForm.get('brand')?.invalid &&
+              productForm.get('brand')?.touched
+            "
+          >
+            <option value="">Chọn thương hiệu</option>
+            <option *ngFor="let brand of brands" [value]="brand">
+              {{ brand }}
+            </option>
+          </select>
+          <div
+            class="error-message"
+            *ngIf="
+              productForm.get('brand')?.invalid &&
+              productForm.get('brand')?.touched
+            "
+          >
+            {{ getFieldError("brand") }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Options -->
+      <div class="image-section">
+        <label>Hình ảnh sản phẩm</label>
+
+        <!-- Image Type Toggle -->
+        <div class="image-type-toggle">
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="imageType"
+              value="url"
+              [(ngModel)]="imageType"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <span>URL hình ảnh</span>
+          </label>
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="imageType"
+              value="upload"
+              [(ngModel)]="imageType"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <span>Tải lên hình ảnh</span>
+          </label>
+        </div>
+
+        <!-- URL Input -->
+        <div class="input-group" *ngIf="imageType === 'url'">
+          <input
+            type="url"
+            id="imageUrl"
+            formControlName="imageUrl"
+            placeholder="https://example.com/image.jpg"
+          />
+        </div>
+
+        <!-- File Upload -->
+        <div class="upload-section" *ngIf="imageType === 'upload'">
+          <input
+            type="file"
+            id="imageFile"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            #fileInput
+          />
+          <label for="imageFile" class="upload-button">
+            <i class="material-icons">cloud_upload</i>
+            Chọn hình ảnh
+          </label>
+          <div class="upload-info" *ngIf="selectedFile">
+            Đã chọn: {{ selectedFile.name }}
+          </div>
+        </div>
+
+        <!-- Image Preview -->
+        <div class="image-preview" *ngIf="imagePreview">
+          <img [src]="imagePreview" alt="Preview" />
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="goBack()"
+          [disabled]="loading"
+        >
+          <i class="material-icons">close</i>
+          Hủy
+        </button>
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="productForm.invalid || loading"
+        >
+          <i class="material-icons" *ngIf="!loading">save</i>
+          <i class="material-icons spinning" *ngIf="loading">refresh</i>
+          {{ loading ? "Đang cập nhật..." : "Cập nhật sản phẩm" }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" *ngIf="success">
+    <div class="success-card">
+      <i class="material-icons success-icon">check_circle</i>
+      <h2>Cập nhật thành công!</h2>
+      <p>Sản phẩm đã được cập nhật thành công.</p>
+    </div>
+  </div>
+
+  <!-- Error Overlay -->
+  <div class="error-overlay" *ngIf="error">
+    <div class="error-card">
+      <i class="material-icons error-icon">error</i>
+      <h2>Có lỗi xảy ra</h2>
+      <p>{{ error }}</p>
+      <button (click)="clearError()" class="ok-button">
+        <i class="material-icons">close</i>
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>

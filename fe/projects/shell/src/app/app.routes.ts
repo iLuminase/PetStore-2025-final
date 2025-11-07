@@ -12,8 +12,16 @@ export const routes: Routes = [
   {
     path: 'products',
     loadChildren: () =>
+      loadRemoteModule('products', './routes').then(m => m.routes)
+    // Temporarily disable auth guard
+    // canActivate: [authGuard]
+  },
+  {
+    path: 'admin',
+    loadChildren: () =>
       loadRemoteModule('products', './routes').then(m => m.routes),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { roles: ['ADMIN', 'MANAGER'] }
   },
   {
     path: 'unauthorized',

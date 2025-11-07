@@ -14,7 +14,7 @@ import {
     providedIn: 'root'
 })
 export class ProductService {
-    private apiUrl = 'http://localhost:8080/api/products'; // Via gateway
+    private apiUrl = 'http://localhost:8082/api/products'; // Direct product-api
 
     private productsSubject = new BehaviorSubject<Product[]>([]);
     public products$ = this.productsSubject.asObservable();
@@ -39,7 +39,14 @@ export class ProductService {
             if (params.maxPrice !== undefined) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
             if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
             if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
-            if (params.sort) httpParams = httpParams.set('sort', params.sort);
+            if (params.sort) {
+                // Parse sort parameter "createdAt,desc" into sortBy and sortDir
+                const sortParts = params.sort.split(',');
+                const sortBy = sortParts[0] || 'id';
+                const sortDir = sortParts[1] || 'asc';
+                httpParams = httpParams.set('sortBy', sortBy);
+                httpParams = httpParams.set('sortDir', sortDir);
+            }
         }
 
         return this.http.get<ProductResponse>(this.apiUrl, { params: httpParams })
@@ -118,6 +125,65 @@ export class ProductService {
      */
     getCategories(): Observable<string[]> {
         return this.http.get<string[]>(`${this.apiUrl}/categories`);
+    }
+
+    /**
+     * Get all brands
+     */
+    getBrands(): Observable<string[]> {
+        return this.http.get<string[]>(`${this.apiUrl}/brands`);
+    }
+
+    /**
+     * Get low stock products
+     */
+    getLowStockProducts(threshold: number = 10): Observable<Product[]> {
+        const params = new HttpParams().set('threshold', threshold.toString());
+        return this.http.get<Product[]>(`${this.apiUrl}/low-stock`, { params });
+    }
+
+    /**
+     * Update product stock
+     */
+    updateStock(id: number, quantity: number): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/${id}/stock`, { quantity });
+    }
+
+    /**
+     * Increase product stock
+     */
+    increaseStock(id: number, quantity: number): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/${id}/stock/increase`, { quantity });
+    }
+
+    /**
+     * Decrease product stock
+     */
+    decreaseStock(id: number, quantity: number): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/${id}/stock/decrease`, { quantity });
+    }
+
+    /**
+     * Upload product image
+     */
+    uploadProductImage(id: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post(`${this.apiUrl}/${id}/image`, formData);
+    }
+
+    /**
+     * Delete product image
+     */
+    deleteProductImage(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${id}/image`);
+    }
+
+    /**
+     * Get product image URL with full domain for standalone use
+     */
+    getProductImageUrl(id: number): string {
+        return `${this.apiUrl}/${id}/image`;
     }
 
     /**

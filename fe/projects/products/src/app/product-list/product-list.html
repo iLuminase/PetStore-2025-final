@@ -1,7 +1,19 @@
 <div class="product-list" *ngIf="authState$ | async as authState">
   <!-- Header -->
   <div class="header">
-    <h1>Danh sách sản phẩm đồ ăn cho thú cưng</h1>
+    <div class="header-top">
+      <h1>Danh sách sản phẩm đồ ăn cho thú cưng</h1>
+
+      <!-- Admin Links -->
+      <div
+        class="admin-links"
+        *ngIf="userHasRole(authState, ['ADMIN', 'MANAGER'])"
+      >
+        <a routerLink="/products/admin/dashboard" class="admin-btn dashboard">
+          🛠️ Admin Dashboard
+        </a>
+      </div>
+    </div>
 
     <!-- Search and Filter -->
     <div class="filters">

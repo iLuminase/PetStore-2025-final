@@ -14,12 +14,12 @@ module.exports = withNativeFederation({
   shared: {
     "@angular/core": {
       singleton: true,
-      strictVersion: true,
+      strictVersion: false,
       requiredVersion: "auto",
     },
     "@angular/common": {
       singleton: true,
-      strictVersion: true,
+      strictVersion: false,
       requiredVersion: "auto",
     },
     "@angular/router": {

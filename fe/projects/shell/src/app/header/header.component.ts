@@ -148,4 +148,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   get cartTotal(): number {
     return this.cart ? this.cart.totalAmount : 0;
   }
+
+  hasAdminRole(): boolean {
+    return this.authService.isAdmin();
+  }
 }

@@ -10,12 +10,28 @@ spring:
     username: ${MSSQL_KEYCLOAK_USER:keycloakadmin@keycloak-sqlserver}
     password: ${MSSQL_KEYCLOAK_PASSWORD:123qwe!@#}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      maximum-pool-size: 8
+      minimum-idle: 3
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.SQLServerDialect
+    properties:
+      hibernate:
+        "[format_sql]": false
+        "[use_sql_comments]": false
+        jdbc:
+          "[batch_size]": 15
+        "[order_inserts]": true
+        "[order_updates]": true
+        cache:
+          "[use_second_level_cache]": false
 
 # JWT Configuration
 jwt:
@@ -37,5 +53,8 @@ google:
 # Logging
 logging:
   level:
-    com.auth_api: DEBUG
-    org.springframework.security: DEBUG
+    "[com.auth_api]": WARN
+    "[org.springframework.security]": ERROR
+    root: ERROR
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %logger{20} - %msg%n"

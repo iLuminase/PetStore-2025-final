@@ -1,0 +1,220 @@
+<div class="low-stock" *ngIf="authState && userHasRole(['ADMIN', 'MANAGER'])">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="navigateToDashboard()">
+        ← Dashboard
+      </button>
+      <div class="header-text">
+        <h1>⚠️ Sản phẩm sắp hết hàng</h1>
+        <p>Quản lý và bổ sung tồn kho cho các sản phẩm có số lượng thấp</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="all-products-btn" (click)="navigateToAllProducts()">
+        📋 Tất cả sản phẩm
+      </button>
+    </div>
+  </div>
+
+  <!-- Threshold Settings -->
+  <div class="threshold-section">
+    <div class="threshold-controls">
+      <label>Ngưỡng cảnh báo tồn kho:</label>
+      <input
+        type="number"
+        [(ngModel)]="threshold"
+        (change)="onThresholdChange()"
+        min="1"
+        max="100"
+      />
+      <span class="threshold-note"
+        >Hiển thị sản phẩm có tồn kho ≤ {{ threshold }}</span
+      >
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Đang tải danh sách sản phẩm sắp hết hàng...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadLowStockProducts()" class="retry-btn">Thử lại</button>
+  </div>
+
+  <!-- Products List -->
+  <div *ngIf="!loading && !error" class="products-section">
+    <!-- Summary -->
+    <div class="summary-cards">
+      <div class="summary-card critical">
+        <div class="card-icon">🚨</div>
+        <div class="card-content">
+          <h3>{{ getCriticalStockCount() }}</h3>
+          <p>Hết hàng hoàn toàn</p>
+        </div>
+      </div>
+
+      <div class="summary-card warning">
+        <div class="card-icon">⚠️</div>
+        <div class="card-content">
+          <h3>{{ getVeryLowStockCount() }}</h3>
+          <p>Rất ít tồn kho (< 5)</p>
+        </div>
+      </div>
+
+      <div class="summary-card low">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+          <h3>{{ lowStockProducts.length }}</h3>
+          <p>Tổng sản phẩm cần chú ý</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" *ngIf="lowStockProducts.length > 0">
+      <div
+        *ngFor="let product of sortProductsByPriority()"
+        class="product-card"
+        [class]="getStockStatus(product.stockQuantity)"
+      >
+        <!-- Priority Badge -->
+        <div class="priority-badge">
+          <span
+            class="priority-level"
+            [class]="'priority-' + getPriorityLevel(product.stockQuantity)"
+          >
+            {{
+              getPriorityLevel(product.stockQuantity) === 1
+                ? "KHẨN CẤP"
+                : getPriorityLevel(product.stockQuantity) === 2
+                ? "RẤT CAO"
+                : getPriorityLevel(product.stockQuantity) === 3
+                ? "CAO"
+                : "TRUNG BÌNH"
+            }}
+          </span>
+        </div>
+
+        <!-- Product Image -->
+        <div class="product-image">
+          <img
+            [src]="getProductImageUrl(product)"
+            [alt]="product.name"
+            (error)="handleImageError($event)"
+          />
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <h3>{{ product.name }}</h3>
+          <p class="product-category">{{ product.category }}</p>
+          <p class="product-brand" *ngIf="product.brand">{{ product.brand }}</p>
+
+          <div class="stock-info">
+            <span
+              class="stock-badge"
+              [class]="getStockStatus(product.stockQuantity)"
+            >
+              {{ getStockStatusText(product.stockQuantity) }}
+            </span>
+            <span class="stock-number"
+              >{{ product.stockQuantity }} còn lại</span
+            >
+          </div>
+
+          <div class="price">
+            {{ product.price | currency : "VND" : "symbol" : "1.0-0" }}
+          </div>
+        </div>
+
+        <!-- Restock Controls -->
+        <div class="restock-section">
+          <h4>Bổ sung tồn kho</h4>
+
+          <div class="restock-controls">
+            <div class="quantity-input">
+              <label>Số lượng nhập:</label>
+              <input
+                type="number"
+                [(ngModel)]="stockUpdateQuantity[product.id]"
+                min="1"
+                placeholder="Nhập số lượng..."
+              />
+            </div>
+
+            <button (click)="restockProduct(product.id)" class="restock-btn">
+              📦 Nhập hàng
+            </button>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button
+              (click)="
+                stockUpdateQuantity[product.id] = 20; restockProduct(product.id)
+              "
+              class="quick-restock-btn small"
+            >
+              +20
+            </button>
+            <button
+              (click)="
+                stockUpdateQuantity[product.id] = 50; restockProduct(product.id)
+              "
+              class="quick-restock-btn medium"
+            >
+              +50
+            </button>
+            <button
+              (click)="
+                stockUpdateQuantity[product.id] = 100;
+                restockProduct(product.id)
+              "
+              class="quick-restock-btn large"
+            >
+              +100
+            </button>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button (click)="editProduct(product.id)" class="edit-btn">
+            ✏️ Chỉnh sửa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="lowStockProducts.length === 0" class="empty-state">
+      <div class="empty-content">
+        <div class="empty-icon">✅</div>
+        <h3>Tuyệt vời! Không có sản phẩm nào sắp hết hàng</h3>
+        <p>Tất cả sản phẩm đều có tồn kho trên {{ threshold }} sản phẩm.</p>
+        <button (click)="navigateToAllProducts()" class="view-all-btn">
+          Xem tất cả sản phẩm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Access Denied -->
+<div
+  *ngIf="authState && !userHasRole(['ADMIN', 'MANAGER'])"
+  class="access-denied"
+>
+  <div class="access-denied-content">
+    <h2>🚫 Truy cập bị từ chối</h2>
+    <p>Bạn không có quyền xem thông tin tồn kho.</p>
+    <button routerLink="/products" class="back-btn">
+      ← Quay lại trang sản phẩm
+    </button>
+  </div>
+</div>

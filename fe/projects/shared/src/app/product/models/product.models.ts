@@ -7,8 +7,6 @@ export interface Product {
     category: string;
     imageUrl?: string;
     brand?: string;
-    weight?: number;
-    dimensions?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -18,11 +16,9 @@ export interface ProductCreateRequest {
     description: string;
     price: number;
     stockQuantity: number;
-    category: string;
+    category?: string;
     imageUrl?: string;
     brand?: string;
-    weight?: number;
-    dimensions?: string;
 }
 
 export interface ProductUpdateRequest extends Partial<ProductCreateRequest> {
