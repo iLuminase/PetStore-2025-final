@@ -21,7 +21,7 @@ export class AuthService {
     if (this.initialized) {
       return; // Already initialized
     }
-    
+
     try {
       console.log('AuthService: Initializing...');
       // Keycloak.isLoggedIn() is synchronous, not async
@@ -29,8 +29,23 @@ export class AuthService {
       console.log('AuthService: isLoggedIn =', isLoggedIn);
       this.isLoggedInSubject.next(isLoggedIn);
       if (isLoggedIn) {
-        this.profile = await this.keycloak.loadUserProfile();
-        console.log('AuthService: User profile loaded:', this.profile);
+        try {
+          this.profile = await this.keycloak.loadUserProfile();
+          console.log('AuthService: User profile loaded:', this.profile);
+        } catch (profileError) {
+          console.warn('AuthService: Could not load user profile (CORS issue), continuing without profile:', profileError);
+          // Set basic profile from token instead
+          const token = this.keycloak.getKeycloakInstance().tokenParsed;
+          if (token) {
+            this.profile = {
+              username: token['preferred_username'] || token['sub'],
+              email: token['email'],
+              firstName: token['given_name'],
+              lastName: token['family_name']
+            } as KeycloakProfile;
+            console.log('AuthService: Profile extracted from token:', this.profile);
+          }
+        }
       }
       this.initialized = true;
     } catch (error) {
@@ -48,7 +63,18 @@ export class AuthService {
         this.profile = profile;
         console.log('Profile updated:', profile);
       }).catch(error => {
-        console.error('Error loading profile:', error);
+        console.warn('Could not load user profile (CORS issue), extracting from token:', error);
+        // Extract profile from token instead
+        const token = this.keycloak.getKeycloakInstance().tokenParsed;
+        if (token) {
+          this.profile = {
+            username: token['preferred_username'] || token['sub'],
+            email: token['email'],
+            firstName: token['given_name'],
+            lastName: token['family_name']
+          } as KeycloakProfile;
+          console.log('Profile extracted from token:', this.profile);
+        }
       });
     }
   }

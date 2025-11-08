@@ -73,7 +73,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Force update login status on init
     this.authService.updateLoginStatus();
-    
+
     // @ts-ignore - cart$ is a BehaviorSubject in the service
     this.cartService.cart$.pipe(takeUntil(this.destroy$)).subscribe((cart: Cart) => {
       if (cart && cart.items) {

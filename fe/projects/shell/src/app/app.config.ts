@@ -24,7 +24,9 @@ function initializeKeycloak(keycloak: KeycloakService) {
         pkceMethod: 'S256'
       },
     }).catch((error) => {
-      console.error('Keycloak initialization error:', error);
+      console.warn('Keycloak initialization failed (continuing without auth):', error);
+      // Return resolved promise to allow app to continue without Keycloak
+      return Promise.resolve();
     });
   };
 }

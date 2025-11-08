@@ -189,4 +189,29 @@ public class JwtService {
     public Boolean isRefreshToken(String token) {
         return "refresh".equals(extractTokenType(token));
     }
+
+    public boolean validateKeycloakToken(String token) {
+        // TODO: Implement token validation using Keycloak (e.g., verify signature, expiration)
+        // Example: Use Keycloak's TokenVerifier or similar
+        try {
+            // Placeholder: Assume token is valid if not null
+            return token != null && !token.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public String extractKeycloakUsername(String token) {
+        // TODO: Extract username from Keycloak token (e.g., from claims)
+        // Example: Decode JWT and get "preferred_username" claim
+        // Placeholder: Return a dummy username
+        return "dummyUser";
+    }
+    
+    public List<String> extractKeycloakRoles(String token) {
+        // TODO: Extract roles from Keycloak token (e.g., from "realm_access" or "resource_access" claims)
+        // Example: Decode JWT and parse roles
+        // Placeholder: Return a list with a dummy role
+        return List.of("USER");
+    }
 }

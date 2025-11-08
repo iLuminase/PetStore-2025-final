@@ -151,6 +151,20 @@
                 </div>
               </button>
 
+              <button
+                *ngIf="hasAdminRole()"
+                class="user-menu-item admin-item"
+                (click)="router.navigate(['/admin/users'])"
+              >
+                <mat-icon class="menu-icon">people</mat-icon>
+                <div class="menu-text">
+                  <div class="menu-title">Quản lý người dùng</div>
+                  <div class="menu-subtitle">
+                    Quản lý tài khoản và phân quyền
+                  </div>
+                </div>
+              </button>
+
               <div class="menu-divider"></div>
 
               <button class="user-menu-item logout-item" (click)="onLogout()">

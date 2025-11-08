@@ -1,6 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
     CreateUserRequest,
     KeycloakUser,
@@ -13,7 +26,24 @@ import { UserManagementService } from '../services/user-management.service';
 @Component({
     selector: 'app-user-management',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSlideToggleModule,
+        MatChipsModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatSnackBarModule
+    ],
     templateUrl: './user-management.component.html',
     styleUrls: ['./user-management.component.scss']
 })
@@ -39,10 +69,12 @@ export class UserManagementComponent implements OnInit {
     success: string | null = null;
 
     roles = ['USER', 'MANAGER', 'ADMIN'];
+    displayedColumns: string[] = ['username', 'email', 'name', 'roles', 'status', 'actions'];
 
     constructor(
         private userService: UserManagementService,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private snackBar: MatSnackBar
     ) {
         this.initForms();
     }
@@ -208,13 +240,14 @@ export class UserManagementComponent implements OnInit {
 
         this.userService.createUser(request).subscribe({
             next: (response) => {
-                this.success = response.message;
+                this.snackBar.open('Tạo người dùng thành công!', 'Đóng', { duration: 3000 });
                 this.showCreateDialog = false;
                 this.loadUsers();
                 this.loading = false;
             },
             error: (err) => {
-                this.error = 'Failed to create user: ' + (err.error?.error || err.message);
+                this.error = 'Không thể tạo người dùng: ' + (err.error?.error || err.message);
+                this.snackBar.open(this.error, 'Đóng', { duration: 5000 });
                 this.loading = false;
             }
         });
@@ -230,13 +263,14 @@ export class UserManagementComponent implements OnInit {
 
         this.userService.updateUser(this.selectedUser.id, request).subscribe({
             next: () => {
-                this.success = 'User updated successfully';
+                this.snackBar.open('Cập nhật người dùng thành công!', 'Đóng', { duration: 3000 });
                 this.showEditDialog = false;
                 this.loadUsers();
                 this.loading = false;
             },
             error: (err) => {
-                this.error = 'Failed to update user: ' + (err.error?.errorMessage || err.message);
+                this.error = 'Không thể cập nhật người dùng: ' + (err.error?.errorMessage || err.message);
+                this.snackBar.open(this.error, 'Đóng', { duration: 5000 });
                 this.loading = false;
             }
         });
@@ -250,13 +284,14 @@ export class UserManagementComponent implements OnInit {
 
         this.userService.deleteUser(this.selectedUser.id).subscribe({
             next: () => {
-                this.success = 'User deleted successfully';
+                this.snackBar.open('Xóa người dùng thành công!', 'Đóng', { duration: 3000 });
                 this.showDeleteDialog = false;
                 this.loadUsers();
                 this.loading = false;
             },
             error: (err) => {
-                this.error = 'Failed to delete user: ' + (err.error?.errorMessage || err.message);
+                this.error = 'Không thể xóa người dùng: ' + (err.error?.errorMessage || err.message);
+                this.snackBar.open(this.error, 'Đóng', { duration: 5000 });
                 this.loading = false;
             }
         });
@@ -272,12 +307,13 @@ export class UserManagementComponent implements OnInit {
 
         this.userService.resetPassword(this.selectedUser.id, request).subscribe({
             next: () => {
-                this.success = 'Password reset successfully';
+                this.snackBar.open('Đặt lại mật khẩu thành công!', 'Đóng', { duration: 3000 });
                 this.showPasswordDialog = false;
                 this.loading = false;
             },
             error: (err) => {
-                this.error = 'Failed to reset password: ' + (err.error?.errorMessage || err.message);
+                this.error = 'Không thể đặt lại mật khẩu: ' + (err.error?.errorMessage || err.message);
+                this.snackBar.open(this.error, 'Đóng', { duration: 5000 });
                 this.loading = false;
             }
         });
@@ -294,7 +330,7 @@ export class UserManagementComponent implements OnInit {
 
         this.userService.updateUserRole(userId, request).subscribe({
             next: () => {
-                this.success = 'Role updated successfully';
+                this.snackBar.open('Cập nhật quyền thành công!', 'Đóng', { duration: 3000 });
                 this.showRoleDialog = false;
 
                 // Reload roles for this specific user
@@ -303,14 +339,17 @@ export class UserManagementComponent implements OnInit {
                         // Update roles in users array
                         const userIndex = this.users.findIndex(u => u.id === userId);
                         if (userIndex !== -1) {
-                            this.users[userIndex].roles = roles;
+                            this.users[userIndex].roles = [...roles]; // Create new array to trigger change detection
                         }
 
                         // Update roles in filtered users array
                         const filteredUserIndex = this.filteredUsers.findIndex(u => u.id === userId);
                         if (filteredUserIndex !== -1) {
-                            this.filteredUsers[filteredUserIndex].roles = roles;
+                            this.filteredUsers[filteredUserIndex].roles = [...roles]; // Create new array
                         }
+
+                        // Force table refresh
+                        this.filteredUsers = [...this.filteredUsers];
 
                         this.loading = false;
                     },
@@ -321,7 +360,8 @@ export class UserManagementComponent implements OnInit {
                 });
             },
             error: (err) => {
-                this.error = 'Failed to update role: ' + (err.error?.errorMessage || err.message);
+                this.error = 'Không thể cập nhật quyền: ' + (err.error?.errorMessage || err.message);
+                this.snackBar.open(this.error, 'Đóng', { duration: 5000 });
                 this.loading = false;
             }
         });
@@ -359,6 +399,15 @@ export class UserManagementComponent implements OnInit {
             case 'MANAGER': return 'badge-manager';
             case 'USER': return 'badge-user';
             default: return 'badge-default';
+        }
+    }
+
+    getRoleIcon(role: string): string {
+        switch (role) {
+            case 'ADMIN': return '⚡';
+            case 'MANAGER': return '★';
+            case 'USER': return '●';
+            default: return '○';
         }
     }
 
