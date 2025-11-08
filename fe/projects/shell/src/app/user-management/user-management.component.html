@@ -1,0 +1,35 @@
+<div class="container">
+  <h1>User Management</h1>
+  
+  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="success" class="success">{{ success }}</div>
+  
+  <button (click)="openCreateDialog()">Create User</button>
+  
+  <table *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of filteredUsers">
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ getUserRole(user) }}</td>
+        <td>{{ user.enabled ? 'Active' : 'Inactive' }}</td>
+        <td>
+          <button (click)="openEditDialog(user)">Edit</button>
+          <button (click)="openRoleDialog(user)">Role</button>
+          <button (click)="openPasswordDialog(user)">Password</button>
+          <button (click)="openDeleteDialog(user)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

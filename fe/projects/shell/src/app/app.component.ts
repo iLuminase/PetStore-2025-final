@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from './footer/footer.component';
 import { HeaderComponent } from './header/header.component';
+import { AuthService } from '../service/auth.service';
 
 @Component({
   selector: 'app-shell-root',
@@ -10,6 +11,17 @@ import { HeaderComponent } from './header/header.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'shell';
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    // Initialize auth service after Keycloak is ready
+    console.log('AppComponent: Initializing auth service...');
+    this.authService.initialize().then(() => {
+      console.log('AppComponent: Auth service initialized');
+      this.authService.updateLoginStatus();
+    });
+  }
 }

@@ -1,0 +1,29 @@
+.container {
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+button {
+  margin: 5px;
+  padding: 5px 10px;
+}
+
+.error {
+  color: red;
+  padding: 10px;
+}
+
+.success {
+  color: green;
+  padding: 10px;
+}

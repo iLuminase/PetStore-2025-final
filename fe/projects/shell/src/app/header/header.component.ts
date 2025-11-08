@@ -57,10 +57,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public router: Router,
     public authService: AuthService
   ) {
+    // Subscribe to login state changes
     this.authService.isLoggedIn$.subscribe((isLoggedIn: boolean) => {
+      console.log('Header: isLoggedIn changed to', isLoggedIn);
       this.isLoggedIn = isLoggedIn;
       if (isLoggedIn) {
         this.username = this.authService.getUsername() || '';
+        console.log('Header: username', this.username);
       } else {
         this.username = '';
       }
@@ -68,6 +71,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Force update login status on init
+    this.authService.updateLoginStatus();
+    
     // @ts-ignore - cart$ is a BehaviorSubject in the service
     this.cartService.cart$.pipe(takeUntil(this.destroy$)).subscribe((cart: Cart) => {
       if (cart && cart.items) {

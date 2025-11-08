@@ -84,98 +84,80 @@
           </div>
         </button>
 
-        <!-- Modern User Menu -->
+        <!-- User Menu Button -->
         <button
+          mat-icon-button
           [matMenuTriggerFor]="userMenu"
-          class="modern-user-btn"
-          matTooltip="Tài khoản của tôi"
+          class="user-profile-btn"
+          matTooltip="Tài khoản của bạn"
         >
-          <div class="user-avatar">
-            <mat-icon>account_circle</mat-icon>
-          </div>
-          <div class="user-info">
-            <span class="user-name">{{ username }}</span>
-            <mat-icon class="dropdown-icon">keyboard_arrow_down</mat-icon>
-          </div>
+          <mat-icon>account_circle</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu" class="modern-user-dropdown">
+        <mat-menu
+          #userMenu="matMenu"
+          class="modern-user-dropdown"
+          xPosition="before"
+        >
           <div class="user-menu-container" (click)="$event.stopPropagation()">
-            <!-- User Header -->
+            <!-- Header -->
             <div class="user-menu-header">
-              <div class="user-avatar-large">
-                <mat-icon>account_circle</mat-icon>
-              </div>
-              <div class="user-details">
-                <h4 class="username">{{ username }}</h4>
-                <p class="user-email">Người dùng hệ thống</p>
+              <div class="header-content">
+                <div class="avatar-circle">
+                  <mat-icon>account_circle</mat-icon>
+                </div>
+                <div class="header-text">
+                  <h3>{{ username }}</h3>
+                  <span class="user-email">{{
+                    authService.getEmail() || ""
+                  }}</span>
+                </div>
               </div>
             </div>
 
             <!-- Menu Items -->
             <div class="user-menu-items">
               <button
-                mat-menu-item
                 class="user-menu-item"
                 (click)="router.navigate(['/profile'])"
               >
                 <mat-icon class="menu-icon">person</mat-icon>
                 <div class="menu-text">
-                  <span class="menu-title">Hồ sơ của tôi</span>
-                  <span class="menu-subtitle">Xem và chỉnh sửa thông tin</span>
+                  <div class="menu-title">Hồ sơ của tôi</div>
+                  <div class="menu-subtitle">Quản lý thông tin cá nhân</div>
                 </div>
               </button>
 
               <button
-                mat-menu-item
                 class="user-menu-item"
                 (click)="router.navigate(['/orders'])"
               >
                 <mat-icon class="menu-icon">receipt_long</mat-icon>
                 <div class="menu-text">
-                  <span class="menu-title">Đơn hàng của tôi</span>
-                  <span class="menu-subtitle">Theo dõi đơn hàng</span>
+                  <div class="menu-title">Đơn hàng của tôi</div>
+                  <div class="menu-subtitle">Theo dõi đơn hàng</div>
                 </div>
               </button>
 
               <button
-                mat-menu-item
-                class="user-menu-item"
-                (click)="router.navigate(['/cart'])"
-              >
-                <mat-icon class="menu-icon">shopping_cart</mat-icon>
-                <div class="menu-text">
-                  <span class="menu-title">Giỏ hàng</span>
-                  <span class="menu-subtitle"
-                    >{{ cartItemCount }} sản phẩm</span
-                  >
-                </div>
-              </button>
-
-              <mat-divider class="menu-divider"></mat-divider>
-
-              <button
-                mat-menu-item
+                *ngIf="hasAdminRole()"
                 class="user-menu-item admin-item"
                 (click)="router.navigate(['/admin/dashboard'])"
-                *ngIf="hasAdminRole()"
               >
                 <mat-icon class="menu-icon">admin_panel_settings</mat-icon>
                 <div class="menu-text">
-                  <span class="menu-title">Quản trị hệ thống</span>
-                  <span class="menu-subtitle">Bảng điều khiển</span>
+                  <div class="menu-title">Quản trị hệ thống</div>
+                  <div class="menu-subtitle">Trang quản lý admin</div>
                 </div>
               </button>
 
-              <button
-                mat-menu-item
-                class="user-menu-item logout-item"
-                (click)="onLogout()"
-              >
+              <div class="menu-divider"></div>
+
+              <button class="user-menu-item logout-item" (click)="onLogout()">
                 <mat-icon class="menu-icon">logout</mat-icon>
                 <div class="menu-text">
-                  <span class="menu-title">Đăng xuất</span>
-                  <span class="menu-subtitle">Thoát khỏi tài khoản</span>
+                  <div class="menu-title">Đăng xuất</div>
+                  <div class="menu-subtitle">Thoát khỏi tài khoản</div>
                 </div>
               </button>
             </div>

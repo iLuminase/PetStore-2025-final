@@ -10,22 +10,46 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
   public profile?: KeycloakProfile | null;
+  private initialized = false;
 
   constructor(private readonly keycloak: KeycloakService) {
-    this.initialize();
+    // Don't initialize in constructor, wait for APP_INITIALIZER to complete
+    // Initialize will be called explicitly from AppComponent
   }
 
   public async initialize() {
+    if (this.initialized) {
+      return; // Already initialized
+    }
+    
     try {
-      const isLoggedIn = await this.keycloak.isLoggedIn();
+      console.log('AuthService: Initializing...');
+      // Keycloak.isLoggedIn() is synchronous, not async
+      const isLoggedIn = this.keycloak.isLoggedIn();
+      console.log('AuthService: isLoggedIn =', isLoggedIn);
       this.isLoggedInSubject.next(isLoggedIn);
       if (isLoggedIn) {
         this.profile = await this.keycloak.loadUserProfile();
-        console.log('User logged in:', this.profile);
+        console.log('AuthService: User profile loaded:', this.profile);
       }
+      this.initialized = true;
     } catch (error) {
-      console.error('Error initializing auth:', error);
+      console.error('AuthService: Error initializing:', error);
       this.isLoggedInSubject.next(false);
+    }
+  }
+
+  public updateLoginStatus(): void {
+    const isLoggedIn = this.keycloak.isLoggedIn();
+    console.log('Login status updated:', isLoggedIn);
+    this.isLoggedInSubject.next(isLoggedIn);
+    if (isLoggedIn) {
+      this.keycloak.loadUserProfile().then(profile => {
+        this.profile = profile;
+        console.log('Profile updated:', profile);
+      }).catch(error => {
+        console.error('Error loading profile:', error);
+      });
     }
   }
 
